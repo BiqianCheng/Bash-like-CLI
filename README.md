@@ -21,31 +21,31 @@ There's a fundamental class for all the other classes. And all the other classes
 
  * CBase
  
-  The common class for all classes. It has a virtual function of execute(), which should be implemented by the derived classes.
+   The common class for all classes. It has a virtual function of execute(), which should be implemented by the derived classes.
   
  * CConnector
- 
-  The parent class of other concrete connectors class. It inherits from the base class and will be inherited by other connector classes. Its data memebers are the two sides of objects, which will will implement the theirs functions on runtime. And the other utility functions will be declared in the funtions part, such as the setter and getter funtions, etc.
+   
+   The parent class of other concrete connectors class. It inherits from the base class and will be inherited by other connector classes. Its data memebers are the two sides of objects, which will will implement the theirs functions on runtime. And the other utility functions will be declared in the funtions part, such as the setter and getter funtions, etc.
   
  * CRedirConnector
- 
-  The redirection connector class. It will redirect the input and output according to the specific operators.
+   
+   The redirection connector class. It will redirect the input and output according to the specific operators.
 
  * CSpeparatorConnector
  
-  The semicolon connector class. It will implement the function of the semicolon connector in the input string.
+   The semicolon connector class. It will implement the function of the semicolon connector in the input string.
   
  * COrConnector
  
-  The "OR" connector class. It will implment the function of logic disconjunction.
+   The "OR" connector class. It will implment the function of logic disconjunction.
   
  * CAndConnector
  
-  The "AND" connector class. It will implement the function of logic conjuntion.
+   The "AND" connector class. It will implement the function of logic conjuntion.
 
  * CCommand
  
-  The acutal command executor class. It will receive and parse the command and execute the system call.
+   The acutal command executor class. It will receive and parse the command and execute the system call.
   
 ## UML Diagram
 
