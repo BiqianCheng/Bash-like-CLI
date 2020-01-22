@@ -1,7 +1,7 @@
 # CS 100 Programming Project
 
 ## Overview
-This is the ChengWang Shell project created by Shiyou Wang and Biqian Cheng for CS 100 Winter 2020.
+This is the RShell project for CS 100 Winter 2020.
 
 It is a simple shell program which will convert the command from user input to native linux command.
 
