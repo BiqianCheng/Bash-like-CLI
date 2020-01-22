@@ -31,6 +31,10 @@ There's a fundamental class for all the other classes. And all the other classes
    
    The redirection connector class. It will redirect the input and output according to the specific operators.
 
+ * CPipeConnector
+   
+   The piple connector class. It will implement the pipe function between system calls.
+
  * CSpeparatorConnector
  
    The semicolon connector class. It will implement the function of the semicolon connector in the input string.
