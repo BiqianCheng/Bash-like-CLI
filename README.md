@@ -1,3 +1,4 @@
+Hello this is Biqian Cheng
 # CS 100 Programming Project
 
 ## Introduction
