@@ -8,7 +8,7 @@ It is a simple shell program which will convert the command from user input to n
 
 ## UML Diagram
 
-![alt text](https://github.com/cs100/assignment-swthursproj//blob/master/images/cs100uml.png?raw=true, "UML")
+![alt text](https://github.com/cs100/assignment-swthursproj/blob/master/images/cs100UML.png?raw=true, "UML")
 
 ## Bugs
 Please see the  [issues page]
