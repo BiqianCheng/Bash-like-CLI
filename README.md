@@ -14,5 +14,5 @@ It is a simple shell program which will convert the command from user input to n
 Please see the  [issues page]
 
 
-## Contributor
+## Contributors
 - Shiyou Wang
