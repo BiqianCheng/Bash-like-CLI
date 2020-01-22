@@ -12,8 +12,6 @@ The shell program is based on some linux system calls, such as fork(), waitpid()
 
 The fork() function creates a new process by duplicating the calling process. The new process is the child process, which is an almost duplicate of the calling process. The waitpid() function is used to wait for state changes in a child of the calling process, and obtain information about the child whose state has changed. The execvp() function provides an array of pointers to null-terminated string which contains the argument list for the new program.
 
-The sample code of some functions such as fork(), waitpid() and execvp() is uploaded into another branch (swang324/prototypes-and-research). 
-
 
 ## Class Descriptions
 
