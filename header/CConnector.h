@@ -5,17 +5,26 @@
 
 class CConnector : public CBase {
 public:
-    CBase * leftSideItems;
-    CBase * rightSideItems;
+    CBase *leftSideItems;
+    CBase *rightSideItems;
+
+    CConnector() {}
+
+    CConnector(CBase *l, CBase *r) {
+        leftSideItems = l;
+        rightSideItems = r;
+    }
+
 
     virtual bool execute() {
-        if(leftSideItems){
+        if (leftSideItems) {
             leftSideItems->execute();
-        }
-        else if(rightSideItems){
+        } else if (rightSideItems) {
             rightSideItems->execute();
         }
     };
+
+
 
 };
 

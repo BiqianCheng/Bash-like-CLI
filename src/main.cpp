@@ -8,12 +8,13 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/wait.h>
 #include <cstring>
-#include "CAndConnector.h"
-#include "CCommand.h"
-#include "COrConnector.h"
-#include "CSeparatorConnector.h"
+#include "../header/CAndConnector.h"
+#include "../header/CCommand.h"
+#include "../header/COrConnector.h"
+#include "../header/CSeparatorConnector.h"
+#include "../header/CRunMode.h"
+
 
 //#define _MY_DEBUG
 
@@ -29,24 +30,24 @@ using namespace std;
 //};
 
 
-void ConnectorStackOp(vector<CConnector * > & cmdStack, CConnector * pTempConnector, vector<string> & cmdArgVector){
+void ConnectorStackOp(vector<CConnector *> &cmdStack, CConnector *pTempConnector, vector<string> &cmdArgVector) {
 
-    CCommand * pCmd = new CCommand();
+    CCommand *pCmd;
+    pCmd = new CCommand();
     pCmd->vecToken = cmdArgVector;
     cmdArgVector.clear();
 
-    if(cmdStack.empty()){
+    if (cmdStack.empty()) {
         pTempConnector->leftSideItems = pCmd;
         cmdStack.push_back(pTempConnector);
-    }
-    else{
-        CConnector * pTop  = cmdStack.back();
+    } else {
+        CConnector *pTop = cmdStack.back();
         cmdStack.pop_back();
 
         pTop->rightSideItems = pCmd;
 
         pTempConnector->leftSideItems = pTop;
-        cmdStack.push_back( pTempConnector);
+        cmdStack.push_back(pTempConnector);
     }
 }
 
@@ -61,7 +62,7 @@ CConnector * parseCommandLineAndExecute(const string &inputString) {
 
     vector<CConnector * > cmdStack;
 
-    CConnector * pUltimateConnector ;
+    CConnector *pUltimateConnector = nullptr;
 
     while (getline(stringStream, line)) {
         size_t prev = 0, pos;
@@ -137,14 +138,16 @@ int parser() {
     //strInput = "echo one";
 
     //parseCommandLineAndExecute(strInput, wordVector);
-    pUltimateConnector  = parseCommandLineAndExecute(strInput);
+    pUltimateConnector = parseCommandLineAndExecute(strInput);
 
-    if(pUltimateConnector)
+    if (pUltimateConnector)
         pUltimateConnector->execute();
 
     return nRet;
 }
 
+
+int CRunMode::nMode = 0;
 
 int main() {
 

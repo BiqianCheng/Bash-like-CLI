@@ -7,8 +7,14 @@
 class CRdirConnector : public CConnector {
 
 public:
+
+    CRdirConnector() {}
+
+    CRdirConnector(CBase *l, CBase *r) : CConnector(l, r) {}
+
+
     bool execute() {
-        bool bSuccessful;
+        bool bSuccessful = false;
         if (leftSideItems) {
             bSuccessful = leftSideItems->execute();
         }

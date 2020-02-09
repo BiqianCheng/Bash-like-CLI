@@ -7,15 +7,21 @@
 class CPipeConnector : public CConnector {
 
 public:
-    bool execute(){
-        bool bSuccessful;
-        if(leftSideItems){
+
+    CPipeConnector() {}
+
+    CPipeConnector(CBase *l, CBase *r) : CConnector(l, r) {}
+
+
+    bool execute() {
+        bool bSuccessful = false;
+        if (leftSideItems) {
             bSuccessful = leftSideItems->execute();
         }
-        if(!bSuccessful)
+        if (!bSuccessful)
             return false;
 
-        if(rightSideItems){
+        if (rightSideItems) {
             bSuccessful = rightSideItems->execute();
         }
         return bSuccessful;
