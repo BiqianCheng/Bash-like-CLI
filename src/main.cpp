@@ -30,24 +30,26 @@ using namespace std;
 //};
 
 
-void ConnectorStackOp(vector<CConnector *> &cmdStack, CConnector *pTempConnector, vector<string> &cmdArgVector) {
+void ConnectorStackOp(vector<CConnector *> &connectorVector, CConnector *pTempConnector, vector<string> &cmdArgVector) {
 
     CCommand *pCmd;
     pCmd = new CCommand();
-    pCmd->vecToken = cmdArgVector;
-    cmdArgVector.clear();
 
-    if (cmdStack.empty()) {
+    for (int i = 0; i < cmdArgVector.size(); i++) {
+        pCmd->vecToken.push_back(cmdArgVector[i]);
+    }
+
+    if (connectorVector.empty()) {
         pTempConnector->leftSideItems = pCmd;
-        cmdStack.push_back(pTempConnector);
+        connectorVector.push_back(pTempConnector);
     } else {
-        CConnector *pTop = cmdStack.back();
-        cmdStack.pop_back();
+        CConnector *pTop = connectorVector.back();
+        connectorVector.pop_back();
 
         pTop->rightSideItems = pCmd;
 
         pTempConnector->leftSideItems = pTop;
-        cmdStack.push_back(pTempConnector);
+        connectorVector.push_back(pTempConnector);
     }
 }
 
@@ -60,7 +62,7 @@ CConnector * parseCommandLineAndExecute(const string &inputString) {
     vector<string> cmdArgVector;
     string token;
 
-    vector<CConnector * > cmdStack;
+    vector<CConnector *> connectorVector;
 
     CConnector *pUltimateConnector = nullptr;
 
@@ -97,26 +99,33 @@ CConnector * parseCommandLineAndExecute(const string &inputString) {
         } else if (token == "&&") {
 
             CAndConnector *pTempConnector = new CAndConnector();
-            ConnectorStackOp(cmdStack, pTempConnector, cmdArgVector);
+            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
+            cmdArgVector.clear();
+
         } else if (token == "||") {
 
             COrConnector *pTempConnector = new COrConnector();
-            ConnectorStackOp(cmdStack, pTempConnector, cmdArgVector);
+            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
+            cmdArgVector.clear();
+
         } else if (token == ";") {
 
             CSeparatorConnector *pTempConnector = new CSeparatorConnector();
-            ConnectorStackOp(cmdStack, pTempConnector, cmdArgVector);
-        }
-        else{
+            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
+            cmdArgVector.clear();
+
+        } else {
             cmdArgVector.push_back(token);
         }
     }
 
-    if(!cmdArgVector.empty()) {
-        CConnector * pTempConnector = new CConnector;
-        ConnectorStackOp(cmdStack, pTempConnector, cmdArgVector);
+    if (!cmdArgVector.empty()) {
+        CConnector *pTempConnector = new CConnector;
+        ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
         pUltimateConnector = pTempConnector;
     }
+
+    connectorVector.clear();
 
     return pUltimateConnector;
 }
@@ -144,7 +153,7 @@ int parser() {
     if (pUltimateConnector) {
         pUltimateConnector->execute();
 
-        delete pUltimateConnector;
+        CConnector::cleanIt(pUltimateConnector);
         pUltimateConnector = nullptr;
     }
 

@@ -2,6 +2,7 @@
 #define CS100PROJ_CCONNECTOR_H
 
 #include "CBase.h"
+#include "CCommand.h"
 
 class CConnector : public CBase {
 public:
@@ -22,16 +23,45 @@ public:
         cleanup();
     }
 
+    static void cleanIt(CBase *pBase) {
+        CConnector *pConnector = nullptr;
+        CCommand *pCommand = nullptr;
+
+        pConnector = dynamic_cast<CConnector *>(pBase);
+        if (pConnector) {
+            CBase *pL = pConnector->leftSideItems;
+            if (pL) {
+                CConnector::cleanIt(pL);
+                pL = nullptr;
+            }
+
+            CBase *pR = pConnector->rightSideItems;
+            if (pR) {
+                CConnector::cleanIt(pL);
+                pR = nullptr;
+            }
+        } else {
+            pCommand = dynamic_cast<CCommand *>(pBase);
+            if (pCommand) {
+                delete pCommand;
+                pBase = nullptr;
+            }
+        }
+
+        if (pBase) {
+            delete pBase;
+            pBase = nullptr;
+        }
+    }
+
     virtual void cleanup() {
 
         if (leftSideItems) {
-            delete leftSideItems;
-            leftSideItems = nullptr;
+            CConnector::cleanIt(leftSideItems);
         }
 
         if (rightSideItems) {
-            delete rightSideItems;
-            rightSideItems = nullptr;
+            CConnector::cleanIt(rightSideItems);
         }
     }
 
@@ -45,7 +75,7 @@ public:
             rightSideItems->execute();
         }
 
-        cleanup();
+        //cleanup();
     };
 
 

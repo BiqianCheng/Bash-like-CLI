@@ -21,6 +21,8 @@ public:
         if (rightSideItems) {
             bSuccessful = rightSideItems->execute();
         }
+
+        //cleanup();
         return bSuccessful;
     };
 };
