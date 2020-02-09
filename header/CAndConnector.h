@@ -18,7 +18,6 @@ public:
         }
 
         if (!bSuccessful) {
-            //cleanup();
             return false;
         }
 
@@ -26,7 +25,6 @@ public:
             bSuccessful = rightSideItems->execute();
         }
 
-        // cleanup();
         return bSuccessful;
     };
 

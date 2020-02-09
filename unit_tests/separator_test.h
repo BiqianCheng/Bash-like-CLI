@@ -8,20 +8,20 @@
 
 TEST(SeparatorOpTestSet, TwoTrueCmd) {
 
-    CCommand mock1("echo first");
-    CCommand mock2("echo second");
+    CCommand * pCmd1 = new CCommand ("echo first");
+    CCommand * pCmd2 = new CCommand ("echo second");
 
-    CSeparatorConnector exe1(&mock1, &mock2);
+    CSeparatorConnector exe1(pCmd1, pCmd2);
 
     EXPECT_EQ(exe1.execute(), true);
 }
 
 TEST(SeparatorOpTestSet, TwoFalseCmd) {
 
-    CCommand mock1("first");
-    CCommand mock2("second");
+    CCommand * pCmd1 = new CCommand ("first");
+    CCommand * pCmd2 = new CCommand ("second");
 
-    CSeparatorConnector exe1(&mock1, &mock2);
+    CSeparatorConnector exe1(pCmd1, pCmd2);
 
     EXPECT_EQ(exe1.execute(), false);
 }

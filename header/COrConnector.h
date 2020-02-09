@@ -17,14 +17,13 @@ public:
         }
 
         if (bSuccessful) {
-            //cleanup();
             return true;
         }
 
         if (rightSideItems) {
             bSuccessful = rightSideItems->execute();
         }
-        // cleanup();
+
         return bSuccessful;
     }
 };

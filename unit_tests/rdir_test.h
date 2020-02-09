@@ -6,36 +6,24 @@
 #include "../header/CCommand.h"
 #include "../header/CRdirConnector.h"
 
-TEST(RdirOpTestSet, TwoTrueCmd
-) {
+TEST(RdirOpTestSet, TwoTrueCmd) {
 
-CCommand mock1("echo first");
-CCommand mock2("echo second");
+    CCommand mock1("echo first");
+    CCommand mock2("echo second");
 
-CRdirConnector exe1(&mock1, &mock2);
+    CRdirConnector exe1(&mock1, &mock2);
 
-EXPECT_EQ(exe1
-.
-
-execute(),
-
-true);
+    EXPECT_EQ(exe1.execute(),true);
 }
 
-TEST(RdirOpTestSet, TwoFalseCmd
-) {
+TEST(RdirOpTestSet, TwoFalseCmd) {
 
-CCommand mock1("first");
-CCommand mock2("second");
+    CCommand mock1("first");
+    CCommand mock2("second");
 
-CRdirConnector exe1(&mock1, &mock2);
+    CRdirConnector exe1(&mock1, &mock2);
 
-EXPECT_EQ(exe1
-.
-
-execute(),
-
-false);
+    EXPECT_EQ(exe1.execute(),false);
 }
 
 

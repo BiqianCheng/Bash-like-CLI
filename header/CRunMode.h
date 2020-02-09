@@ -18,7 +18,6 @@ public:
     static void setMode(int n) {
         nMode = n;
     }
-
 };
 
 

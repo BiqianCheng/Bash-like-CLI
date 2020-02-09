@@ -9,20 +9,42 @@
 
 TEST(AndOpTestSet, TwoTrueCmd) {
 
-    CCommand mock1("echo first");
-    CCommand mock2("echo second");
+    CCommand * pCmd1 = new CCommand ("echo first");
+    CCommand * pCmd2 = new CCommand ("echo second");
 
-    CAndConnector exe1(&mock1, &mock2);
+    CAndConnector exe1(pCmd1, pCmd2);
 
     EXPECT_EQ(exe1.execute(), true);
 }
 
-TEST(AndOpTestSet, TwoFalseCmd) {
+TEST(AndOpTestSet, TwoTrueCmdWithComment) {
 
-    CCommand mock1("first");
-    CCommand mock2("second");
 
-    CAndConnector exe1(&mock1, &mock2);
+    CCommand * pCmd1 = new CCommand ("echo first#aaa");
+    CCommand * pCmd2 = new CCommand ("echo second #bbb");
+
+    CAndConnector exe1(pCmd1, pCmd2);
+
+    EXPECT_EQ(exe1.execute(), true);
+}
+
+
+TEST(AndOpTestSet, OneLeftFalseCmd) {
+
+
+    CCommand * pCmd1 = new CCommand ("cmdA ");
+    CCommand * pCmd2 = new CCommand ("ls");
+    CAndConnector exe1(pCmd1, pCmd2);
+
+    EXPECT_EQ(exe1.execute(), false);
+}
+
+TEST(AndOpTestSet, OneRightFalseCmd) {
+
+    CCommand * pCmd1 = new CCommand ("ls ");
+    CCommand * pCmd2 = new CCommand ("cmdB");
+
+    CAndConnector exe1(pCmd1, pCmd2);
 
     EXPECT_EQ(exe1.execute(), false);
 }

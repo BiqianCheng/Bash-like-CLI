@@ -1,19 +1,17 @@
 #include <iostream>
-#include <sstream>
 #include <vector>
 #include <string>
 #include <algorithm>
 
-
-#include <cstdlib>
 #include <unistd.h>
-#include <stdio.h>
-#include <cstring>
+
 #include "../header/CAndConnector.h"
 #include "../header/CCommand.h"
 #include "../header/COrConnector.h"
 #include "../header/CSeparatorConnector.h"
 #include "../header/CRunMode.h"
+#include "../header/CRdirConnector.h"
+#include "../header/CPipeConnector.h"
 
 
 //#define _MY_DEBUG
@@ -54,49 +52,28 @@ void ConnectorStackOp(vector<CConnector *> &connectorVector, CConnector *pTempCo
 }
 
 
-CConnector * parseCommandLineAndExecute(const string &inputString) {
+CConnector *parseLineToExecutor(const string &inputConstString) {
 
-    stringstream stringStream(inputString);
-    string line;
+    string token;
     vector<string> wordVector;
     vector<string> cmdArgVector;
-    string token;
-
     vector<CConnector *> connectorVector;
 
     CConnector *pUltimateConnector = nullptr;
 
-    while (getline(stringStream, line)) {
-        size_t prev = 0, pos;
-
-        while ((pos = line.find_first_of(" '", prev)) != string::npos) {
-            if (pos > prev) {
-                token = line.substr(prev, pos - prev);
-                wordVector.push_back(token);
-            }
-            prev = pos + 1;
-        }
-
-        if (prev < line.length()) {
-            token = line.substr(prev, string::npos);
-            wordVector.push_back(token);
-        }
-    }
+    CParser::ParserLineToVector(inputConstString.c_str(), wordVector);
 
 #ifdef  _MY_DEBUG
     for_each(wordVector.begin(), wordVector.end(), [](const string &its) { cout << its << endl; });
 #endif
 
-    reverse(wordVector.begin(),wordVector.end());
+    reverse(wordVector.begin(), wordVector.end());
 
-    while(!wordVector.empty()){
+    while (!wordVector.empty()) {
         token = wordVector.back();
         wordVector.pop_back();
 
-        if (token == "#") {
-            wordVector.clear();
-            break;
-        } else if (token == "&&") {
+        if (token == "&&") {
 
             CAndConnector *pTempConnector = new CAndConnector();
             ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
@@ -114,18 +91,36 @@ CConnector * parseCommandLineAndExecute(const string &inputString) {
             ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
             cmdArgVector.clear();
 
+        } else if (token == "<" || token == "<<") {
+
+            CRdirInConnector *pTempConnector = new CRdirInConnector();
+            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
+            cmdArgVector.clear();
+
+        } else if (token == ">" || token == ">>") {
+            CRdirOutConnector *pTempConnector = new CRdirOutConnector();
+            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
+            cmdArgVector.clear();
+
+        } else if (token == "|") {
+
+            CPipeConnector *pTempConnector = new CPipeConnector();
+            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
+            cmdArgVector.clear();
         } else {
             cmdArgVector.push_back(token);
         }
     }
 
+
     if (!cmdArgVector.empty()) {
         CConnector *pTempConnector = new CConnector;
-        ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
+        ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector
+        );
         pUltimateConnector = pTempConnector;
     }
 
-    connectorVector.clear();
+    //connectorVector.clear();
 
     return pUltimateConnector;
 }
@@ -133,22 +128,31 @@ CConnector * parseCommandLineAndExecute(const string &inputString) {
 
 /*
  * Parser command
- * return 1 for quit
+ *
  */
 int parser() {
     int nRet = 0;
-    CConnector * pUltimateConnector = nullptr;
+    CConnector *pUltimateConnector = nullptr;
     //vector<string> wordVector;
 
     string strInput;
     cout << "$";
-    getline(cin, strInput);
+
+    static int nOnce = 0;
+    if (!nOnce) {
+        //strInput = "ls > 1.txt";
+        //strInput = "tr a-z A-Z < 1.txt";
+        strInput = "ls -l | wc -l";
+        nOnce++;
+    } else {
+        getline(cin, strInput);
+    }
 
     //strInput = "echo one && echo two; ";
     //strInput = "echo one";
 
-    //parseCommandLineAndExecute(strInput, wordVector);
-    pUltimateConnector = parseCommandLineAndExecute(strInput);
+    //parseLineToExecutor(strInput, wordVector);
+    pUltimateConnector = parseLineToExecutor(strInput);
 
     if (pUltimateConnector) {
         pUltimateConnector->execute();

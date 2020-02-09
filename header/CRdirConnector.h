@@ -7,27 +7,66 @@
 class CRdirConnector : public CConnector {
 
 public:
-
     CRdirConnector() {}
 
     CRdirConnector(CBase *l, CBase *r) : CConnector(l, r) {}
 
 
+};
+
+
+class CRdirInConnector : public CRdirConnector {
+public:
+    CRdirInConnector() {}
+
     bool execute() {
         bool bSuccessful = false;
-        if (leftSideItems) {
-            bSuccessful = leftSideItems->execute();
+
+
+        if(leftSideItems && rightSideItems){
+
+            CCommand * pCmd = dynamic_cast< CCommand * >(leftSideItems);
+            CCommand * pParameters = dynamic_cast< CCommand * >(rightSideItems);
+            if(pCmd && pParameters) {
+
+                string strFileName = pParameters->vecToken[0];
+                pCmd->setRdirInFileName(strFileName);
+
+                pParameters->skipIt = true;
+
+                //CConnector::cleanIt(pParameters);
+
+                pCmd->execute();
+            }
         }
 
-//        if (!bSuccessful) {
-//            cleanup();
-//            return false;
-//        }
+        return bSuccessful;
+    };
+};
 
-        if (rightSideItems) {
-            bSuccessful = rightSideItems->execute();
+class CRdirOutConnector : public CRdirConnector {
+public:
+    CRdirOutConnector() {}
+
+    bool execute() {
+        bool bSuccessful = false;
+
+        if(leftSideItems && rightSideItems){
+
+            CCommand * pCmd = dynamic_cast< CCommand * >(leftSideItems);
+            CCommand * pParameters = dynamic_cast< CCommand * >(rightSideItems);
+            if(pCmd && pParameters) {
+
+                string strFileName = pParameters->vecToken[0];
+                pCmd->setRdirOutFileName(strFileName);
+
+                pParameters->skipIt = true;
+
+                //CConnector::cleanIt(pParameters);
+
+                pCmd->execute();
+            }
         }
-        //cleanup();
         return bSuccessful;
     };
 };

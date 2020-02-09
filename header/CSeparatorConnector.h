@@ -11,7 +11,6 @@ public:
 
     CSeparatorConnector(CBase *l, CBase *r) : CConnector(l, r) {}
 
-
     bool execute() {
         bool bSuccessful = false;
         if (leftSideItems) {
@@ -22,7 +21,6 @@ public:
             bSuccessful = rightSideItems->execute();
         }
 
-        //cleanup();
         return bSuccessful;
     };
 };

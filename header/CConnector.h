@@ -37,7 +37,7 @@ public:
 
             CBase *pR = pConnector->rightSideItems;
             if (pR) {
-                CConnector::cleanIt(pL);
+                CConnector::cleanIt(pR);
                 pR = nullptr;
             }
         } else {
@@ -55,7 +55,6 @@ public:
     }
 
     virtual void cleanup() {
-
         if (leftSideItems) {
             CConnector::cleanIt(leftSideItems);
         }
@@ -65,7 +64,6 @@ public:
         }
     }
 
-
     virtual bool execute() {
         if (leftSideItems) {
             leftSideItems->execute();
@@ -74,11 +72,7 @@ public:
         if (rightSideItems) {
             rightSideItems->execute();
         }
-
-        //cleanup();
     };
-
-
 };
 
 
