@@ -3,11 +3,17 @@
 
 #include "CConnector.h"
 
-class CSeparatorConnector: public CConnector {
+class CSeparatorConnector : public CConnector {
 
 public:
+
+    CSeparatorConnector() {}
+
+    CSeparatorConnector(CBase *l, CBase *r) : CConnector(l, r) {}
+
+
     bool execute() {
-        bool bSuccessful;
+        bool bSuccessful = false;
         if (leftSideItems) {
             bSuccessful = leftSideItems->execute();
         }

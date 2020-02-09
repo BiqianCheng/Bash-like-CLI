@@ -2,6 +2,7 @@
 #define CS100PROJ_CCOMMAND_H
 
 #include "CBase.h"
+#include "CRunMode.h"
 
 #include <cstdlib>
 #include <unistd.h>
@@ -11,19 +12,48 @@
 
 #include <vector>
 #include <string>
-using  namespace std;
+
+using namespace std;
 
 class CCommand : public CBase {
 public:
     vector<string> vecToken;
 
-    bool execute(){
+    CCommand() {}
+
+    CCommand(const char *pFullLine) {
+
+        string inputString = pFullLine;
+        stringstream stringStream(inputString);
+        string line;
+        vector<string> wordVector;
+        string token;
+
+        while (getline(stringStream, line)) {
+            size_t prev = 0, pos;
+
+            while ((pos = line.find_first_of(" '", prev)) != string::npos) {
+                if (pos > prev) {
+                    token = line.substr(prev, pos - prev);
+                    wordVector.push_back(token);
+                }
+                prev = pos + 1;
+            }
+
+            if (prev < line.length()) {
+                token = line.substr(prev, string::npos);
+                wordVector.push_back(token);
+            }
+        }
+        vecToken = wordVector;
+    }
+
+
+    bool execute() {
         int nRet = 0;
         bool bResult = true;
         int size = vecToken.size();
         if (size) {
-//        int fd[2] = {0, 0};
-//        int ret = pipe(fd);
 
             char **argv = nullptr;
 
@@ -37,16 +67,22 @@ public:
                 strcpy(argv[i], itStr.c_str());
             }
 
-            if(!strcmp(argv[0],"exit")){
+            if (!strcmp(argv[0], "exit")) {
                 exit(1);
             }
 
-            //runCommand(argv,fd[0],fd[1]);
-            runCommand(argv, 0, 1, nRet);
+            if (CRunMode::isTestingMode()) {
+                int fd[2] = {0, 0};
+                int ret = pipe(fd);
+                runCommand(argv, fd[0], fd[1], nRet);
+            } else {
+                runCommand(argv, 0, 1, nRet);
+            }
+
 #ifdef  _MY_DEBUG
             cout << "nRet:"<<nRet<< endl;
 #endif
-            if(nRet ==0)
+            if (nRet == 0)
                 bResult = true;
             else
                 bResult = false;
@@ -61,7 +97,7 @@ public:
     }
 
 
-    void runCommand(char **argv, int fdIn, int fdOut, int & nRet) {
+    void runCommand(char **argv, int fdIn, int fdOut, int &nRet) {
         pid_t cpid = 0;
         int ret = 0;
         int status = 0;
@@ -84,7 +120,9 @@ public:
 #endif
             }
 
-            //close(fdIn);
+            if (CRunMode::isTestingMode()) {
+                close(fdIn);
+            }
 
             ret = dup2(fdOut, STDOUT_FILENO);
             if (ret == -1) {
@@ -93,7 +131,9 @@ public:
 #endif
             }
 
-            //close(fdOut);
+            if (CRunMode::isTestingMode()) {
+                close(fdOut);
+            }
 
 #ifdef  _MY_DEBUG
             cout << "execvp " << argv[0] << "  " << argv[1] << endl;
@@ -103,14 +143,16 @@ public:
 //#ifdef  _MY_DEBUG
 //            perror("execvp error!!!");
 //#endif
-                string strErrMsg = "Executing ";
-                strErrMsg += argv[0] ;
-                strErrMsg += " error";
-                perror(strErrMsg.c_str());
+                if (!CRunMode::isTestingMode()) {
+                    string strErrMsg = "Executing ";
+                    strErrMsg += argv[0];
+                    strErrMsg += " error";
+                    perror(strErrMsg.c_str());
+                }
+
                 nRet = __LINE__;
-            }
-            else{
-                nRet  = 0;
+            } else {
+                nRet = 0;
             }
 
             exit(nRet);
@@ -129,7 +171,7 @@ public:
 
             if (WEXITSTATUS(status) == 0) {
                 //exit(EXIT_SUCCESS);
-                nRet  = 0;
+                nRet = 0;
 
 //                cout << "waitpid done"<<endl;
 
