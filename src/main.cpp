@@ -142,7 +142,7 @@ int parser() {
     string strInput;
     cout << "$";
 
-    static int nOnce = 0;
+    static int nOnce = 10;
     if (!nOnce) {
         strInput = "echo aa;echo bb;";
         //strInput = "ls > 1.txt";
@@ -171,13 +171,13 @@ int parser() {
 }
 
 
-int CRunMode::nMode = 0;
+CRunMode::RunningMode  CRunMode::nMode = CRunMode::R_NORMAL;
 
 int main() {
 
     do {
         parser();
-        //sleep(1);
+        sleep(1);
 
         if (CRunMode::isEnding())
             break;

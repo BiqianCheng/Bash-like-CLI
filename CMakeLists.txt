@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 ADD_SUBDIRECTORY(googletest)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall ")
+#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall ")
 
 set(HEADERS header/CBase.h header/CConnector.h header/CAndConnector.h header/CCommand.h header/COrConnector.h header/CSeparatorConnector.h header/CRdirConnector.h header/CPipeConnector.h header/CRunMode.h header/CParser.h)
 set(SOURCES src/main.cpp )

@@ -8,22 +8,22 @@
 
 TEST(RdirOpTestSet, RdirOutCmd) {
 
-    CCommand mock1("ls");
-    CCommand mock2("1.txt");
+    CCommand * pCmd1 = new CCommand ("ls");
+    CCommand * pCmd2 = new CCommand ("1.txt");
 
-    CRdirOutConnector exe1(&mock1, &mock2);
+    CRdirOutConnector exe1(pCmd1, pCmd2);
 
     EXPECT_EQ(exe1.execute(),true);
 }
 
 TEST(RdirOpTestSet, RdirInCmd) {
 
-    CCommand mock1("tr a-z A-Z");
-    CCommand mock2("1.txt");
+    CCommand * pCmd1 = new CCommand ("tr a-z A-Z");
+    CCommand * pCmd2 = new CCommand ("1.txt");
 
-    CRdirInConnector exe1(&mock1, &mock2);
+    CRdirInConnector exe1(pCmd1, pCmd2);
 
-    EXPECT_EQ(exe1.execute(),false);
+    EXPECT_EQ(exe1.execute(),true);
 }
 
 

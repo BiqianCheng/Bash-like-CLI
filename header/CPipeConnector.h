@@ -26,7 +26,7 @@ public:
 
                 pCmd_B->skipIt = true;
 
-                pCmd_A->execute();
+                bSuccessful = pCmd_A->execute();
             }
         }
 

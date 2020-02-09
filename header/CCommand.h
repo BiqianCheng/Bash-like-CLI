@@ -54,7 +54,7 @@ public:
         advMode = advMode | 1;
     }
 
-    void doRdirIn() {
+    int doRdirIn() {
 //        string wstr;
 //        ifstream wfin;
 //        wfin.open(strInFileName);
@@ -65,6 +65,8 @@ public:
 //
 //        wfin.close();
 
+        int fd = open(strInFileName.c_str(), O_RDONLY);
+        return fd;
     }
 
     void setRdirOutFileName(string &s) {
@@ -87,7 +89,7 @@ public:
         if (skipIt)
             return true;
 
-        if (advMode == 0) {
+        if (advMode != 4) {
 
             int size = vecToken.size();
             if (size) {
@@ -97,7 +99,7 @@ public:
                 argv = CParser::vectorToArgv(vecToken);
 
                 if (!strcmp(argv[0], "exit")) {
-                    CRunMode::setMode(2);
+                    CRunMode::setMode(CRunMode::R_ENDING);
                     CParser::cleanUpArgv(argv, size);
                     return true;
                 }
@@ -120,7 +122,7 @@ public:
                     bResult = false;
             }
 
-        } else if (advMode == 4) {
+        } else  {
 
             int fd[2] = {0, 0};
             int ret = pipe(fd);
@@ -136,14 +138,14 @@ public:
                 argv_B = CParser::vectorToArgv(vecAnother);
 
                 if (!strcmp(argv_A[0], "exit")) {
-                    CRunMode::setMode(2);
+                    CRunMode::setMode(CRunMode::R_ENDING);
                     CParser::cleanUpArgv(argv_A, size_A);
                     CParser::cleanUpArgv(argv_B, size_B);
                     return true;
                 }
 
                 if (!strcmp(argv_B[0], "exit")) {
-                    CRunMode::setMode(2);
+                    CRunMode::setMode(CRunMode::R_ENDING);
                     CParser::cleanUpArgv(argv_A, size_A);
                     CParser::cleanUpArgv(argv_B, size_B);
                     return true;
@@ -159,30 +161,6 @@ public:
                 else
                     bResult = false;
 
-            }
-        } else {
-            int size = vecToken.size();
-            if (size) {
-
-                char **argv = nullptr;
-                argv = CParser::vectorToArgv(vecToken);
-
-                if (!strcmp(argv[0], "exit")) {
-                    CRunMode::setMode(2);
-                    CParser::cleanUpArgv(argv, size);
-                    return true;
-                }
-
-                int fd[2] = {0, 0};
-                pipe(fd);
-                runSpecialIOCommand(argv, fd[0], fd[1], nRet);
-
-                CParser::cleanUpArgv(argv, size);
-
-                if (nRet == 0)
-                    bResult = true;
-                else
-                    bResult = false;
             }
         }
 
@@ -203,8 +181,16 @@ public:
         }
 
         if (cpid == 0) {  // Child process
-            close(STDIN_FILENO);
-            close(fdIn);
+
+            if (advMode & 0x01) {
+                //fdNewIn = doRdirIn();
+                fdNewIn = open(strInFileName.c_str(), O_RDONLY);
+                dup2(fdNewIn, STDIN_FILENO);
+                close(fdIn);
+            } else {
+                close(STDIN_FILENO);
+                close(fdIn);
+            }
 
             if (CRunMode::isTestingMode())
                 close(2);
@@ -225,103 +211,11 @@ public:
                 nRet = 0;
             }
 
-            exit(nRet);
-        } else {
-            ret = waitpid(cpid, &status, WUNTRACED | WCONTINUED);
-
-            if (!CRunMode::isTestingMode()){
-                close(fdOut);
-
-                char temp[1024] = {0};
-                int n = 0;
-                do {
-                    memset(temp, 0, 1024);
-                    n = read(fdIn, temp, 1024);
-                    if (n) {
-                        strOutData += temp;
-                    }
-                } while (n);
-
-
-                if (!CRunMode::isTestingMode()) {
-                    cout << strOutData;
-                }
-            }
-
-            if (WEXITSTATUS(status) == 0) {
-                nRet = 0;
-
-            } else {
-                nRet = __LINE__;
-            }
-        }
-    }
-
-    void runSpecialIOCommand(char **argv, int fdIn, int fdOut, int &nRet) {
-        pid_t cpid = 0;
-        int ret = 0;
-        int status = 0;
-        int fdNewIn = 0;
-
-        cpid = fork();
-
-        if (cpid == -1) {
-            perror("fork error");
-            exit(EXIT_FAILURE);
-        }
-
-        if (cpid == 0) {  // Child process
-
-            if (advMode & 0x01) {
-//                doRdirIn();
-                fdNewIn = open(strInFileName.c_str(), O_RDONLY);
-                ret = dup2(fdNewIn, STDIN_FILENO);
-//                close(fdIn);
-//                fdIn = fdNewIn;
-            } else {
-
-//              ret = dup2(fdIn, STDIN_FILENO);
-                close(STDIN_FILENO);
-                close(fdIn);
-            }
-
-            ret = dup2(fdOut, STDOUT_FILENO);
-
-            //close(fdOut);
-
-            ret = execvp(argv[0], argv);
-            if (ret == -1) {
-
-                if (!CRunMode::isTestingMode()) {
-                    string strErrMsg = "Executing ";
-                    strErrMsg += argv[0];
-                    strErrMsg += " error";
-                    perror(strErrMsg.c_str());
-                }
-
-                nRet = __LINE__;
-            } else {
-                nRet = 0;
-            }
-
-            if (advMode & 0x01) {
-                close(fdNewIn);
-            }
-
             close(fdOut);
             exit(nRet);
         } else {
-#ifdef  _MY_DEBUG
-            cout << "Parent PID is " << cpid << endl;
-#endif
             ret = waitpid(cpid, &status, WUNTRACED | WCONTINUED);
-            //ret = wait(&status);
-            if (ret == -1) {
-#ifdef  _MY_DEBUG
-                perror("waitpid error");
-#endif
-            }
-/*
+
             close(fdOut);
 
             char temp[1024] = {0};
@@ -341,19 +235,15 @@ public:
                     cout << strOutData;
                 }
             }
-*/
+
             if (WEXITSTATUS(status) == 0) {
-                //exit(EXIT_SUCCESS);
                 nRet = 0;
 
             } else {
-                //exit(EXIT_FAILURE);
-                //perror("waitpid error");
                 nRet = __LINE__;
             }
         }
     }
-
 
     void runMultiCommand(char **argv_A, char **argv_B, int fdIn, int fdOut, int &nRet) {
         pid_t cpid = 0;

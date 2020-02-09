@@ -11,7 +11,6 @@ public:
 
     CRdirConnector(CBase *l, CBase *r) : CConnector(l, r) {}
 
-
 };
 
 
@@ -23,7 +22,6 @@ public:
 
     bool execute() {
         bool bSuccessful = false;
-
 
         if(leftSideItems && rightSideItems){
 
@@ -38,7 +36,7 @@ public:
 
                 //CConnector::cleanIt(pParameters);
 
-                pCmd->execute();
+                bSuccessful = pCmd->execute();
             }
         }
 
@@ -67,7 +65,7 @@ public:
 
                 //CConnector::cleanIt(pParameters);
 
-                pCmd->execute();
+                bSuccessful = pCmd->execute();
             }
         }
         return bSuccessful;

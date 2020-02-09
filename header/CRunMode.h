@@ -4,18 +4,20 @@
 
 class CRunMode {
 public:
-    static int nMode; // 0 Normal  1 Test (no error message in googletest mode)  2 Quit
+    //static int nMode; // 0 Normal  1 Test (no error message in googletest mode)  2 Quit
+    typedef  enum _runningMode { R_NORMAL, R_TESTING, R_ENDING }  RunningMode;
 
+    static RunningMode nMode;
 public:
     static bool isTestingMode() {
-        return (nMode == 1);
+        return (nMode == R_TESTING);
     }
 
     static bool isEnding() {
-        return (nMode == 2);
+        return (nMode == R_ENDING);
     }
 
-    static void setMode(int n) {
+    static void setMode(RunningMode n) {
         nMode = n;
     }
 };

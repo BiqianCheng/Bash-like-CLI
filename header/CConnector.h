@@ -72,6 +72,8 @@ public:
         if (rightSideItems) {
             rightSideItems->execute();
         }
+
+        return true;
     };
 };
 

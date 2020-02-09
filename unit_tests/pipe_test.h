@@ -9,12 +9,12 @@
 
 TEST(PipeOpTestSet, TwoTrueCmd) {
 
-    CCommand mock1("ls -l");
-    CCommand mock2("wc -l");
+    CCommand * pCmd1 = new CCommand ("ls -l");
+    CCommand * pCmd2 = new CCommand ("wc -l");
 
-    CPipeConnector exe1(&mock1, &mock2);
+    CPipeConnector exe1(pCmd1, pCmd2);
 
-    EXPECT_EQ(exe1.execute(),false);
+    EXPECT_EQ(exe1.execute(),true);
 }
 
 
