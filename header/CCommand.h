@@ -84,11 +84,10 @@ public:
         int nRet = 0;
         bool bResult = true;
 
-        if (skipIt) {
+        if (skipIt)
             return true;
-        }
 
-        if (advMode != 4) {
+        if (advMode == 0) {
 
             int size = vecToken.size();
             if (size) {
@@ -96,7 +95,6 @@ public:
                 char **argv = nullptr;
 
                 argv = CParser::vectorToArgv(vecToken);
-                //argv = CParser::vectorToArgvWithExtra(vecToken,0, vecExtra);
 
                 if (!strcmp(argv[0], "exit")) {
                     CRunMode::setMode(2);
@@ -104,12 +102,14 @@ public:
                     return true;
                 }
 
-                if (CRunMode::isTestingMode() || advMode) {
+//                if (!CRunMode::isTestingMode()) {
+//                    runNormalCommand(argv, 0, 1, nRet);
+//                }
+//                else
+                {
                     int fd[2] = {0, 0};
-                    int ret = pipe(fd);
-                    runCommand(argv, fd[0], fd[1], nRet);
-                } else {
-                    runCommand(argv, 0, 1, nRet);
+                    pipe(fd);
+                    runNormalCommand(argv, fd[0], fd[1], nRet);
                 }
 
                 CParser::cleanUpArgv(argv, size);
@@ -119,7 +119,8 @@ public:
                 else
                     bResult = false;
             }
-        } else {
+
+        } else if (advMode == 4) {
 
             int fd[2] = {0, 0};
             int ret = pipe(fd);
@@ -148,8 +149,7 @@ public:
                     return true;
                 }
 
-
-                runMultiCommand(argv_A,argv_B,fd[0], fd[1], nRet );
+                runMultiCommand(argv_A, argv_B, fd[0], fd[1], nRet);
 
                 CParser::cleanUpArgv(argv_A, size_A);
                 CParser::cleanUpArgv(argv_B, size_B);
@@ -160,59 +160,138 @@ public:
                     bResult = false;
 
             }
+        } else {
+            int size = vecToken.size();
+            if (size) {
 
+                char **argv = nullptr;
+                argv = CParser::vectorToArgv(vecToken);
 
+                if (!strcmp(argv[0], "exit")) {
+                    CRunMode::setMode(2);
+                    CParser::cleanUpArgv(argv, size);
+                    return true;
+                }
+
+                int fd[2] = {0, 0};
+                pipe(fd);
+                runSpecialIOCommand(argv, fd[0], fd[1], nRet);
+
+                CParser::cleanUpArgv(argv, size);
+
+                if (nRet == 0)
+                    bResult = true;
+                else
+                    bResult = false;
+            }
         }
-
 
         return bResult;
     }
 
-    void runCommand(char **argv, int fdIn, int fdOut, int &nRet) {
+    void runNormalCommand(char **argv, int fdIn, int fdOut, int &nRet) {
         pid_t cpid = 0;
         int ret = 0;
         int status = 0;
+        int fdNewIn = 0;
 
         cpid = fork();
 
         if (cpid == -1) {
-            //throw CException("Fork Error!");
             perror("fork error");
             exit(EXIT_FAILURE);
-        } else if (cpid == 0) {  // Child process
+        }
+
+        if (cpid == 0) {  // Child process
+            close(STDIN_FILENO);
+            close(fdIn);
+
+            if (CRunMode::isTestingMode())
+                close(2);
+
+            dup2(fdOut, STDOUT_FILENO);
+            //close(STDOUT_FILENO);
+
+            ret = execvp(argv[0], argv);
+            if (ret == -1) {
+                if (!CRunMode::isTestingMode()) {
+                    string strErrMsg = "Executing ";
+                    strErrMsg += argv[0];
+                    strErrMsg += " error";
+                    perror(strErrMsg.c_str());
+                }
+                nRet = __LINE__;
+            } else {
+                nRet = 0;
+            }
+
+            exit(nRet);
+        } else {
+            ret = waitpid(cpid, &status, WUNTRACED | WCONTINUED);
+
+            if (!CRunMode::isTestingMode()){
+                close(fdOut);
+
+                char temp[1024] = {0};
+                int n = 0;
+                do {
+                    memset(temp, 0, 1024);
+                    n = read(fdIn, temp, 1024);
+                    if (n) {
+                        strOutData += temp;
+                    }
+                } while (n);
+
+
+                if (!CRunMode::isTestingMode()) {
+                    cout << strOutData;
+                }
+            }
+
+            if (WEXITSTATUS(status) == 0) {
+                nRet = 0;
+
+            } else {
+                nRet = __LINE__;
+            }
+        }
+    }
+
+    void runSpecialIOCommand(char **argv, int fdIn, int fdOut, int &nRet) {
+        pid_t cpid = 0;
+        int ret = 0;
+        int status = 0;
+        int fdNewIn = 0;
+
+        cpid = fork();
+
+        if (cpid == -1) {
+            perror("fork error");
+            exit(EXIT_FAILURE);
+        }
+
+        if (cpid == 0) {  // Child process
 
             if (advMode & 0x01) {
-                //doRdirIn();
-                int fdNewIn = open(strInFileName.c_str(), O_RDONLY);
+//                doRdirIn();
+                fdNewIn = open(strInFileName.c_str(), O_RDONLY);
                 ret = dup2(fdNewIn, STDIN_FILENO);
-                close(fdIn);
-                fdIn = fdNewIn;
+//                close(fdIn);
+//                fdIn = fdNewIn;
             } else {
-                ret = dup2(fdIn, STDIN_FILENO);
-                if (ret == -1) {
-#ifdef  _MY_DEBUG
-                    perror("dup2 error STDIN_FILENO");
-#endif
-                }
+
+//              ret = dup2(fdIn, STDIN_FILENO);
+                close(STDIN_FILENO);
                 close(fdIn);
             }
 
             ret = dup2(fdOut, STDOUT_FILENO);
-            if (ret == -1) {
-#ifdef  _MY_DEBUG
-                perror("dup2 error STDOUT_FILENO");
-#endif
-            }
-            close(fdOut);
 
-#ifdef  _MY_DEBUG
-            cout << "execvp " << argv[0] << "  " << argv[1] << endl;
-#endif
+            //close(fdOut);
+
             ret = execvp(argv[0], argv);
             if (ret == -1) {
-//#ifdef  _MY_DEBUG
-//            perror("execvp error!!!");
-//#endif
+
                 if (!CRunMode::isTestingMode()) {
                     string strErrMsg = "Executing ";
                     strErrMsg += argv[0];
@@ -225,8 +304,12 @@ public:
                 nRet = 0;
             }
 
-            exit(nRet);
+            if (advMode & 0x01) {
+                close(fdNewIn);
+            }
 
+            close(fdOut);
+            exit(nRet);
         } else {
 #ifdef  _MY_DEBUG
             cout << "Parent PID is " << cpid << endl;
@@ -238,7 +321,7 @@ public:
                 perror("waitpid error");
 #endif
             }
-
+/*
             close(fdOut);
 
             char temp[1024] = {0};
@@ -258,7 +341,7 @@ public:
                     cout << strOutData;
                 }
             }
-
+*/
             if (WEXITSTATUS(status) == 0) {
                 //exit(EXIT_SUCCESS);
                 nRet = 0;
@@ -271,37 +354,35 @@ public:
         }
     }
 
+
     void runMultiCommand(char **argv_A, char **argv_B, int fdIn, int fdOut, int &nRet) {
         pid_t cpid = 0;
         int ret = 0;
         int status = 0;
 
-        if (fork() == 0)            //first child used to output
-        {
+        if (fork() == 0) {           //first child used to output
             close(STDOUT_FILENO);  //closing stdout
             dup(fdOut);         //replacing stdout with pipe write 
             close(fdIn);       //closing pipe read
             close(fdOut);
 
             execvp(argv_A[0], argv_A);
-            //perror("execvp of ls failed");
+            //perror("execvp of first one failed");
             exit(1);
         }
-        
-        if (fork() == 0)            //second child used to input
-        {
+
+        if (fork() == 0)  {          //second child used to input
             close(STDIN_FILENO);   //closing stdin
             dup(fdIn);         //replacing stdin with pipe read
             close(fdOut);       //closing pipe write
             close(fdIn);
 
             execvp(argv_B[0], argv_B);
-            //perror("execvp of wc failed");
+            //perror("execvp of second one failed");
             exit(1);
         }
 
-        if(1)
-        {
+        if (1) {
             close(fdIn);
             close(fdOut);
 

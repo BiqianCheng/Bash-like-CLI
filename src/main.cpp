@@ -53,7 +53,7 @@ void ConnectorStackOp(vector<CConnector *> &connectorVector, CConnector *pTempCo
 
 
 CConnector *parseLineToExecutor(const string &inputConstString) {
-
+    int pos = 0;
     string token;
     vector<string> wordVector;
     vector<string> cmdArgVector;
@@ -113,10 +113,14 @@ CConnector *parseLineToExecutor(const string &inputConstString) {
     }
 
 
+
     if (!cmdArgVector.empty()) {
         CConnector *pTempConnector = new CConnector;
-        ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector
-        );
+        ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
+        pUltimateConnector = pTempConnector;
+    }
+    else{
+        CConnector *pTempConnector = connectorVector.back();
         pUltimateConnector = pTempConnector;
     }
 
@@ -138,8 +142,9 @@ int parser() {
     string strInput;
     cout << "$";
 
-    static int nOnce = 10;
+    static int nOnce = 0;
     if (!nOnce) {
+        strInput = "echo aa;echo bb;";
         //strInput = "ls > 1.txt";
         //strInput = "tr a-z A-Z < 1.txt";
         //strInput = "ls -l | wc -l";
@@ -172,7 +177,7 @@ int main() {
 
     do {
         parser();
-        sleep(1);
+        //sleep(1);
 
         if (CRunMode::isEnding())
             break;

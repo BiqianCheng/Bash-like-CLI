@@ -15,11 +15,14 @@ public:
         string inputString = pFullLine;
 
         string line;
-        string token;
+
+        string tokenTemp;
 
         size_t prev = 0;
         size_t pos = 0;
+        size_t len = 0;
 
+        // Remove comment
         pos = inputString.find_first_of("#", 0);
         if (pos != string::npos) {
             if (pos) {
@@ -31,23 +34,93 @@ public:
 
         stringstream ss(inputString);
         while (getline(ss, line)) {
-
-            while ((pos = line.find_first_of(" '", prev)) != string::npos) {
+            // Remove space and quotation
+            while ((pos = line.find_first_of(" '\"", prev)) != string::npos) {
                 if (pos > prev) {
-                    token = line.substr(prev, pos - prev);
-                    wordVector.push_back(token);
+                    tokenTemp = line.substr(prev, pos - prev);
+
+                    len = tokenTemp.length();
+
+                    if(len==1){
+                         wordVector.push_back(tokenTemp);
+                    }
+                    else if(len==2){
+                        if( tokenTemp== "&&" || tokenTemp== "||" || tokenTemp== "<<" || tokenTemp== ">>" ){
+                            wordVector.push_back(tokenTemp);
+                        }
+                        else {
+                            splitConsecutive(tokenTemp, wordVector);
+                        }
+                    }
+                    else{
+                        splitConsecutive(tokenTemp, wordVector);
+                    }
                 }
                 prev = pos + 1;
             }
 
             if (prev < line.length()) {
-                token = line.substr(prev, string::npos);
-                wordVector.push_back(token);
+                tokenTemp = line.substr(prev, string::npos);
+                //wordVector.push_back(token);
+                splitConsecutive(tokenTemp, wordVector);
             }
         }
 
         return 0;
     }
+
+    static void splitConsecutive(string & tokenChunk, vector<string> & wordVector){
+
+        bool bToSplit = false;
+        char c = 0;
+        string strGenuine;
+
+        const size_t len = tokenChunk.length();
+        size_t prev = 0;
+        size_t pos = 0;
+
+        pos = tokenChunk.find_first_of(";<>&|", 0);
+        if(pos == string::npos){
+            wordVector.push_back(tokenChunk);
+            return;
+        }
+
+        while ((pos = tokenChunk.find_first_of(";<>&|", prev)) != string::npos) {
+            c = tokenChunk[pos];
+
+            strGenuine = tokenChunk.substr(prev, pos - prev);
+            if(strGenuine.length()){
+                wordVector.push_back(strGenuine);
+            }
+
+            // Current part
+            if(pos<len){
+                char sz[3]={0,0,0};
+                sz[0] = c;
+
+                if(pos<len-1) {
+                    if (c == tokenChunk[pos + 1]) {
+                        if (c == '&' || c == '|') {
+                            sz[1] = c;
+                            pos++;
+                        } else if (c == ';' || c == '<' || c == '>') {
+                            pos++;
+                        }
+                    }
+                }
+                wordVector.push_back(sz);
+            }
+
+            prev = pos + 1;
+        }
+
+
+        if (prev < len) {
+            string strTail = tokenChunk.substr(prev, string::npos);
+            wordVector.push_back(strTail);
+        }
+    }
+
 
     static char ** vectorToArgv(vector<string> & vecToken ){
         char **argv = nullptr;

@@ -29,6 +29,7 @@ TEST(AndOpTestSet, TwoTrueCmdWithComment) {
 }
 
 
+
 TEST(AndOpTestSet, OneLeftFalseCmd) {
 
 
