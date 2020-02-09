@@ -96,7 +96,6 @@ public:
         return bResult;
     }
 
-
     void runCommand(char **argv, int fdIn, int fdOut, int &nRet) {
         pid_t cpid = 0;
         int ret = 0;

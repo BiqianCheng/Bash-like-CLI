@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 
 #include "and_test.h"
+#include "or_test.h"
+#include "separator_test.h"
 
 int CRunMode::nMode = 1;
 

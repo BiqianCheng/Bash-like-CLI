@@ -3,14 +3,11 @@
 
 #include "../header/CRunMode.h"
 #include "../header/CBase.h"
-#include "../header/CAndConnector.h"
 #include "../header/CCommand.h"
-#include "../header/COrConnector.h"
-#include "../header/CSeparatorConnector.h"
+#include "../header/CAndConnector.h"
 
 
 TEST(AndOpTestSet, TwoTrueCmd) {
-
 
     CCommand mock1("echo first");
     CCommand mock2("echo second");
@@ -21,7 +18,6 @@ TEST(AndOpTestSet, TwoTrueCmd) {
 }
 
 TEST(AndOpTestSet, TwoFalseCmd) {
-
 
     CCommand mock1("first");
     CCommand mock2("second");
