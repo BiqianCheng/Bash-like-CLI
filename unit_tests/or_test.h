@@ -19,7 +19,6 @@ TEST(OrOpTestSet, TwoTrueCmd) {
 
 TEST(OrOpTestSet, TwoFalseCmd) {
 
-
     CCommand mock1("first");
     CCommand mock2("second");
 

@@ -48,6 +48,9 @@ public:
         vecToken = wordVector;
     }
 
+    virtual ~CCommand() {
+
+    }
 
     bool execute() {
         int nRet = 0;
@@ -68,7 +71,16 @@ public:
             }
 
             if (!strcmp(argv[0], "exit")) {
-                exit(1);
+                //exit(1);
+                CRunMode::setMode(2);
+
+                // clean up
+                for (int i = 0; i < size; ++i) {
+                    delete[] argv[i];
+                }
+                delete[] argv;
+
+                return true;
             }
 
             if (CRunMode::isTestingMode()) {
@@ -88,7 +100,7 @@ public:
                 bResult = false;
 
             for (int i = 0; i < size; ++i) {
-                delete argv[i];
+                delete[] argv[i];
             }
 
             delete[] argv;

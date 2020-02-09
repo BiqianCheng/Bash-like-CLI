@@ -17,12 +17,16 @@ public:
             bSuccessful = leftSideItems->execute();
         }
 
-        if (!bSuccessful)
+        if (!bSuccessful) {
+            cleanup();
             return false;
+        }
 
         if (rightSideItems) {
             bSuccessful = rightSideItems->execute();
         }
+
+        cleanup();
         return bSuccessful;
     };
 

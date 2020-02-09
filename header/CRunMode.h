@@ -4,11 +4,19 @@
 
 class CRunMode {
 public:
-    static int nMode; // 0 Normal  1 Test (no error message in googletest mode)
+    static int nMode; // 0 Normal  1 Test (no error message in googletest mode)  2 Quit
 
 public:
     static bool isTestingMode() {
         return (nMode == 1);
+    }
+
+    static bool isEnding() {
+        return (nMode == 2);
+    }
+
+    static void setMode(int n) {
+        nMode = n;
     }
 
 };

@@ -91,17 +91,18 @@ CConnector * parseCommandLineAndExecute(const string &inputString) {
         token = wordVector.back();
         wordVector.pop_back();
 
-        if(token == "&&" ){
+        if (token == "#") {
+            wordVector.clear();
+            break;
+        } else if (token == "&&") {
 
             CAndConnector *pTempConnector = new CAndConnector();
             ConnectorStackOp(cmdStack, pTempConnector, cmdArgVector);
-        }
-        else if(token == "||"){
+        } else if (token == "||") {
 
             COrConnector *pTempConnector = new COrConnector();
             ConnectorStackOp(cmdStack, pTempConnector, cmdArgVector);
-        }
-        else if(token == ";"){
+        } else if (token == ";") {
 
             CSeparatorConnector *pTempConnector = new CSeparatorConnector();
             ConnectorStackOp(cmdStack, pTempConnector, cmdArgVector);
@@ -140,8 +141,13 @@ int parser() {
     //parseCommandLineAndExecute(strInput, wordVector);
     pUltimateConnector = parseCommandLineAndExecute(strInput);
 
-    if (pUltimateConnector)
+    if (pUltimateConnector) {
         pUltimateConnector->execute();
+
+        delete pUltimateConnector;
+        pUltimateConnector = nullptr;
+    }
+
 
     return nRet;
 }
@@ -151,11 +157,14 @@ int CRunMode::nMode = 0;
 
 int main() {
 
-    int nRet = 0;
     do {
         parser();
         sleep(1);
-    } while (!nRet);
+
+        if (CRunMode::isEnding())
+            break;
+
+    } while (1);
 
     return 0;
 }

@@ -8,21 +8,46 @@ public:
     CBase *leftSideItems;
     CBase *rightSideItems;
 
-    CConnector() {}
+    CConnector() {
+        leftSideItems = nullptr;
+        rightSideItems = nullptr;
+    }
 
     CConnector(CBase *l, CBase *r) {
         leftSideItems = l;
         rightSideItems = r;
     }
 
+    virtual ~CConnector() {
+        cleanup();
+    }
+
+    virtual void cleanup() {
+
+        if (leftSideItems) {
+            delete leftSideItems;
+            leftSideItems = nullptr;
+        }
+
+        if (rightSideItems) {
+            delete rightSideItems;
+            rightSideItems = nullptr;
+        }
+    }
+
 
     virtual bool execute() {
         if (leftSideItems) {
             leftSideItems->execute();
-        } else if (rightSideItems) {
+        }
+
+        if (rightSideItems) {
             rightSideItems->execute();
         }
+
+        cleanup();
     };
+
 
 };
 
