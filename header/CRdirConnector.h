@@ -18,6 +18,8 @@ public:
 class CRdirInConnector : public CRdirConnector {
 public:
     CRdirInConnector() {}
+    CRdirInConnector(CBase *l, CBase *r) : CRdirConnector(l, r){ }
+
 
     bool execute() {
         bool bSuccessful = false;
@@ -47,6 +49,7 @@ public:
 class CRdirOutConnector : public CRdirConnector {
 public:
     CRdirOutConnector() {}
+    CRdirOutConnector(CBase *l, CBase *r) : CRdirConnector(l, r){ }
 
     bool execute() {
         bool bSuccessful = false;

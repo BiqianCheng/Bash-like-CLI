@@ -9,23 +9,15 @@
 
 TEST(PipeOpTestSet, TwoTrueCmd) {
 
-    CCommand mock1("echo first");
-    CCommand mock2("echo second");
-
-    CPipeConnector exe1(&mock1, &mock2);
-
-    EXPECT_EQ(exe1.execute(),true);
-}
-
-TEST(PipeOpTestSet, TwoFalseCmd) {
-
-    CCommand mock1("first");
-    CCommand mock2("second");
+    CCommand mock1("ls -l");
+    CCommand mock2("wc -l");
 
     CPipeConnector exe1(&mock1, &mock2);
 
     EXPECT_EQ(exe1.execute(),false);
 }
+
+
 
 
 #endif

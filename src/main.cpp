@@ -138,11 +138,11 @@ int parser() {
     string strInput;
     cout << "$";
 
-    static int nOnce = 0;
+    static int nOnce = 10;
     if (!nOnce) {
         //strInput = "ls > 1.txt";
         //strInput = "tr a-z A-Z < 1.txt";
-        strInput = "ls -l | wc -l";
+        //strInput = "ls -l | wc -l";
         nOnce++;
     } else {
         getline(cin, strInput);
