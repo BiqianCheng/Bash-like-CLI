@@ -1,8 +1,14 @@
 #include "gtest/gtest.h"
 
 #include "and_test.h"
+#include "or_test.h"
+#include "separator_test.h"
 
-int CRunMode::nMode = 1;
+#include "rdir_test.h"
+#include "pipe_test.h"
+
+
+CRunMode::RunningMode  CRunMode::nMode = CRunMode::R_TESTING;
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

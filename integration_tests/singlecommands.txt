@@ -1,8 +1,8 @@
 echo "------------Single Command Tests------------"
-echo hello world
 echo "echo hello world"
-echo "cat singlecommands.txt"
-cat singlecommands.txt
+echo hello world
+echo "cat single_command_test.sh"
+cat single_command_test.sh
 echo "ls -a"
 ls -a
 echo "pwd"

@@ -6,11 +6,9 @@
 class CSeparatorConnector : public CConnector {
 
 public:
-
     CSeparatorConnector() {}
 
     CSeparatorConnector(CBase *l, CBase *r) : CConnector(l, r) {}
-
 
     bool execute() {
         bool bSuccessful = false;
@@ -21,6 +19,7 @@ public:
         if (rightSideItems) {
             bSuccessful = rightSideItems->execute();
         }
+
         return bSuccessful;
     };
 };

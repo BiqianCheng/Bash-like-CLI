@@ -12,18 +12,24 @@ public:
 
     CPipeConnector(CBase *l, CBase *r) : CConnector(l, r) {}
 
-
     bool execute() {
         bool bSuccessful = false;
-        if (leftSideItems) {
-            bSuccessful = leftSideItems->execute();
-        }
-        if (!bSuccessful)
-            return false;
 
-        if (rightSideItems) {
-            bSuccessful = rightSideItems->execute();
+        if(leftSideItems && rightSideItems){
+
+            CCommand * pCmd_A = dynamic_cast< CCommand * >(leftSideItems);
+            CCommand * pCmd_B = dynamic_cast< CCommand * >(rightSideItems);
+            if(pCmd_A && pCmd_B) {
+
+                pCmd_A->vecAnother = pCmd_B->vecToken;
+                pCmd_A->advMode = 4;
+
+                pCmd_B->skipIt = true;
+
+                bSuccessful = pCmd_A->execute();
+            }
         }
+
         return bSuccessful;
     };
 };
