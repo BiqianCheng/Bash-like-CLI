@@ -120,8 +120,14 @@ CConnector *parseLineToExecutor(const string &inputConstString) {
         pUltimateConnector = pTempConnector;
     }
     else{
-        CConnector *pTempConnector = connectorVector.back();
-        pUltimateConnector = pTempConnector;
+        if(!connectorVector.empty()) {
+            CConnector *pTempConnector = connectorVector.back();
+            pUltimateConnector = pTempConnector;
+        }
+        else{ // empty command
+            CConnector *pTempConnector = new CConnector();
+            pUltimateConnector = pTempConnector;
+        }
     }
 
     //connectorVector.clear();
@@ -144,7 +150,10 @@ int parser() {
 
     static int nOnce = 10;
     if (!nOnce) {
-        strInput = "echo aa;echo bb;";
+        //strInput = "echo \"       # other\"";
+        //strInput = "echo         # other";
+        strInput = "echo \"------------Commented Command Tests------------\"";
+        //strInput = "echo aa;echo bb;";
         //strInput = "ls > 1.txt";
         //strInput = "tr a-z A-Z < 1.txt";
         //strInput = "ls -l | wc -l";
