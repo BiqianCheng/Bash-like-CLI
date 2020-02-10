@@ -6,7 +6,6 @@
 class CSeparatorConnector : public CConnector {
 
 public:
-
     CSeparatorConnector() {}
 
     CSeparatorConnector(CBase *l, CBase *r) : CConnector(l, r) {}

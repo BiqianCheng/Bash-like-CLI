@@ -280,36 +280,6 @@ public:
             wait(0);
 
             nRet = 0;
-
-            /*
-            char temp[1024] = {0};
-            int n = 0;
-            do {
-                memset(temp, 0, 1024);
-                n = read(fdIn, temp, 1024);
-                if (n) {
-                    strOutData += temp;
-                }
-            } while (n);
-
-            if (advMode & 0x02) {
-                doRdirOut();
-            } else {
-                if (!CRunMode::isTestingMode()) {
-                    cout << strOutData;
-                }
-            }
-
-            if (WEXITSTATUS(status) == 0) {
-                //exit(EXIT_SUCCESS);
-                nRet = 0;
-
-            } else {
-                //exit(EXIT_FAILURE);
-                //perror("waitpid error");
-                nRet = __LINE__;
-            }
-             */
         }
     }
 
