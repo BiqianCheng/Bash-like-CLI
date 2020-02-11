@@ -99,8 +99,8 @@ public:
                 argv = CParser::vectorToArgv(vecToken);
 
                 if (!strcmp(argv[0], "exit")) {
-                    CRunMode::setMode(CRunMode::R_ENDING);
                     CParser::cleanUpArgv(argv, size);
+                    CRunMode::setMode(CRunMode::R_ENDING);
                     return true;
                 }
 
@@ -138,16 +138,18 @@ public:
                 argv_B = CParser::vectorToArgv(vecAnother);
 
                 if (!strcmp(argv_A[0], "exit")) {
-                    CRunMode::setMode(CRunMode::R_ENDING);
+
                     CParser::cleanUpArgv(argv_A, size_A);
                     CParser::cleanUpArgv(argv_B, size_B);
+                    CRunMode::setMode(CRunMode::R_ENDING);
                     return true;
                 }
 
                 if (!strcmp(argv_B[0], "exit")) {
-                    CRunMode::setMode(CRunMode::R_ENDING);
+
                     CParser::cleanUpArgv(argv_A, size_A);
                     CParser::cleanUpArgv(argv_B, size_B);
+                    CRunMode::setMode(CRunMode::R_ENDING);
                     return true;
                 }
 

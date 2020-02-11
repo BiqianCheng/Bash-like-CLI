@@ -397,9 +397,11 @@ public:
         // clean up
         for (int i = 0; i < size; ++i) {
             delete[] argv[i];
+            argv[i] = nullptr;
         }
 
         delete[] argv;
+        argv = nullptr;
     }
 };
 
