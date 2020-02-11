@@ -12,6 +12,10 @@ using namespace std;
 
 class CParser {
 public:
+
+    /*
+     * Remove comments before output
+     */
     static int processComment(string &inputString, bool &bValid, vector<pair<int, int> > &rangeVector, bool &bNeed) {
         size_t prev = 0;
         size_t posPound = 0;
@@ -81,6 +85,9 @@ public:
         return 0;
     }
 
+    /*
+     * Skip quotations before output
+     */
     static int processQuotation(string &inputString, bool &bValid, vector<pair<int, int> > &rangeVector) {
         size_t prev = 0;
         size_t pos = 0;
@@ -182,6 +189,9 @@ public:
         return 0;
     }
 
+    /*
+     * Detect the tokens
+     */
     static int parserLineToVector(const char *pFullLine, vector<string> &wordVector) {
         int nRet = 0;
         string inputString = pFullLine;
@@ -295,6 +305,9 @@ public:
         return 0;
     }
 
+    /*
+     * Split the consecutive commands
+     */
     static void splitConsecutive(string &tokenChunk, vector<string> &wordVector) {
 
         bool bToSplit = false;
@@ -347,6 +360,9 @@ public:
     }
 
 
+    /*
+     * Create the argument array
+     */
     static char **vectorToArgv(vector<string> &vecToken) {
         char **argv = nullptr;
         int size = vecToken.size();
@@ -365,6 +381,7 @@ public:
 
         return argv;
     }
+
 
     static char **vectorToArgvWithExtra(vector<string> &vecToken, int nExtra, vector<string> &vecExtra) {
         char **argv = nullptr;
@@ -391,7 +408,9 @@ public:
         return argv;
     }
 
-
+    /*
+     * Clean up the argument array
+     */
     static void cleanUpArgv(char **argv, int size) {
 
         // clean up

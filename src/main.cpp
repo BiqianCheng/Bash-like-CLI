@@ -16,6 +16,8 @@
 
 //#define _MY_DEBUG
 
+//#define USE_INTERNAL_DEBUG
+
 using namespace std;
 
 //class CException {
@@ -27,7 +29,9 @@ using namespace std;
 //    }
 //};
 
-
+/*
+ * Create connectors with original connectors and incoming commands
+ */
 void ConnectorStackOp(vector<CConnector *> &connectorVector, CConnector *pTempConnector, vector<string> &cmdArgVector) {
 
     CCommand *pCmd;
@@ -51,7 +55,9 @@ void ConnectorStackOp(vector<CConnector *> &connectorVector, CConnector *pTempCo
     }
 }
 
-
+/*
+ * Parse the string into executor
+ */
 CConnector *parseLineToExecutor(const string &inputConstString) {
     int pos = 0;
     string token;
@@ -148,8 +154,13 @@ int parser() {
     string strInput;
     cout << "$";
 
-    static int nOnce = 10;
-    if (!nOnce) {
+#ifdef USE_INTERNAL_DEBUG
+    static int nCnt = 0;
+#else
+    static int nCnt = 1;
+#endif
+    
+    if (!nCnt) {
         //strInput = "echo \"       # other\"";
         //strInput = "echo         # other";
         //strInput = "echo    z     # other";
@@ -161,13 +172,13 @@ int parser() {
         //strInput = "ls > 1.txt";
         //strInput = "tr a-z A-Z < 1.txt";
         //strInput = "ls -l | wc -l";
-        nOnce++;
+        //strInput = "echo one && echo two; ";
+        //strInput = "echo one";
     } else {
-        getline(cin, strInput);
+        getline(cin, strInput);        
     }
 
-    //strInput = "echo one && echo two; ";
-    //strInput = "echo one";
+    nCnt++;
 
     //parseLineToExecutor(strInput, wordVector);
     pUltimateConnector = parseLineToExecutor(strInput);
@@ -186,6 +197,9 @@ int parser() {
 
 CRunMode::RunningMode  CRunMode::nMode = CRunMode::R_NORMAL;
 
+/*
+ * The main part of the rshell
+ */
 int main() {
 
     do {
