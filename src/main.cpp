@@ -61,7 +61,7 @@ CConnector *parseLineToExecutor(const string &inputConstString) {
 
     CConnector *pUltimateConnector = nullptr;
 
-    CParser::ParserLineToVector(inputConstString.c_str(), wordVector);
+    CParser::parserLineToVector(inputConstString.c_str(), wordVector);
 
 #ifdef  _MY_DEBUG
     for_each(wordVector.begin(), wordVector.end(), [](const string &its) { cout << its << endl; });
@@ -152,7 +152,11 @@ int parser() {
     if (!nOnce) {
         //strInput = "echo \"       # other\"";
         //strInput = "echo         # other";
-        strInput = "echo \"------------Commented Command Tests------------\"";
+        //strInput = "echo    z     # other";
+        strInput = "echo    \"# one\"  \"# two\"  ";
+        //strInput = "echo    \\\" orphan  ";
+        //strInput = "echo    \" \\\"# one\\\"  \"# two\"  ";
+        //strInput = "echo \"------------Commented Command Tests------------\"";
         //strInput = "echo aa;echo bb;";
         //strInput = "ls > 1.txt";
         //strInput = "tr a-z A-Z < 1.txt";

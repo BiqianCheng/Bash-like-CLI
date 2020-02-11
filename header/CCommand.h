@@ -40,7 +40,7 @@ public:
     }
 
     CCommand(const char *pFullLine) {
-        CParser::ParserLineToVector(pFullLine, vecToken);
+        CParser::parserLineToVector(pFullLine, vecToken);
         advMode = 0;
         skipIt = 0;
     }
@@ -122,7 +122,7 @@ public:
                     bResult = false;
             }
 
-        } else  {
+        } else {
 
             int fd[2] = {0, 0};
             int ret = pipe(fd);
@@ -261,7 +261,7 @@ public:
             exit(1);
         }
 
-        if (fork() == 0)  {          //second child used to input
+        if (fork() == 0) {          //second child used to input
             close(STDIN_FILENO);   //closing stdin
             dup(fdIn);         //replacing stdin with pipe read
             close(fdOut);       //closing pipe write
