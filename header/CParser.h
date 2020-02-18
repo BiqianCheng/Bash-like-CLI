@@ -6,7 +6,7 @@
 #include <sstream>
 #include <cstring>
 #include <algorithm>
-
+#include <iostream>
 
 using namespace std;
 
@@ -16,7 +16,7 @@ public:
     /*
      * Remove comments before output
      */
-    static int processComment(string &inputString, bool &bValid, vector<pair<int, int> > &rangeVector, bool &bNeed) {
+    static int processComment(string &inputString,vector<pair<int, int> > &rangeVector, bool &bNeed) {
         size_t prev = 0;
         size_t posPound = 0;
         size_t posLast = 0;
@@ -88,7 +88,7 @@ public:
     /*
      * Skip quotations before output
      */
-    static int processQuotation(string &inputString, bool &bValid, vector<pair<int, int> > &rangeVector) {
+    static int processQuotation(string &inputString, vector<pair<int, int> > &rangeVector) {
         size_t prev = 0;
         size_t pos = 0;
 
@@ -137,35 +137,6 @@ public:
                 posLeft = posTemp;
                 posRight = pos;
 
-
-//                nLast = posLeft;
-//
-//                posRightOld = posRight;
-//
-//                posRight = inputString.find_first_of("\"", pos + 1);
-//                if (posRight == string::npos) {
-//
-//                    if(pos+1!=len){
-//                        cout << "Unpaired quotations!" << "Only found left at " << posLeft << endl;
-//                        return __LINE__;
-//                    }
-//                    else{
-//                       // cout << "last quotation"<<endl;
-//                        posRight =  posLeftOld;
-//                    }
-//                }
-//
-//                if (posRight >= 1) {
-//                    t = inputString[posRight - 1];
-//                    if (t == '\\') {
-//
-//                        prev = posRight + 1;
-//                        continue;
-//                    }
-//                }
-//
-//                unpaired--;
-
                 rangeVector.push_back(make_pair(posLeft, posRight));
 
                 prev = posRight + 1;
@@ -183,6 +154,106 @@ public:
 
         return 0;
     }
+
+
+    /*
+    * Replace brackets
+    */
+    static int processBracket(string &inputString) {
+        vector<pair<int, int> > rangeVector;
+        vector<int> posVector;
+
+        string strDup;
+
+        char chCurSymbol=0;
+        char chTemp=0;
+
+        size_t prev = 0;
+        size_t pos = 0;
+        size_t tempPos = 0;
+
+        bool bDone = false;
+        char c = 0;
+        char t = 0;
+
+        size_t posLeft = 0;
+        size_t posRight = 0;
+        const size_t len = inputString.length();
+
+        size_t posTemp = 0;
+
+        int unpaired = 0;
+        int nLast = 0;
+
+        do {
+            pos = inputString.find_first_of("[]", prev);
+            if (pos != string::npos) {
+                chCurSymbol = inputString[pos];
+
+                if (pos >= 1) {
+                    t = inputString[pos - 1];
+                    if ( t == '\\') {
+
+                        prev = pos + 1;
+                        continue;
+                    }
+                }
+
+                if(posVector.empty()) {
+                    posVector.push_back(pos);
+                    prev = pos+1;
+                    continue;
+                }
+
+               if(chCurSymbol == '['){
+                   posVector.push_back(pos);
+               }
+               else if(chCurSymbol == ']'){
+
+                   tempPos = posVector.back();
+                   posVector.pop_back();
+
+                   rangeVector.push_back(make_pair(tempPos, pos));
+               }
+
+                prev = pos+1;
+
+            } else {
+                bDone = true;
+                break;
+            }
+        } while (!bDone);
+
+        if (unpaired) {
+            cout << "Unpaired brackets!" << "Last found left at " << nLast << endl;
+            return __LINE__;
+        }
+
+
+        prev = 0;
+        if(!rangeVector.empty()){
+
+            for(int i=0;i<rangeVector.size();i++){
+
+                pair<int, int>  pr = rangeVector[i];
+                posLeft = pr.first;
+                posRight = pr.second;
+
+                strDup += inputString.substr(prev, posLeft-prev);
+                strDup += "test ";
+                strDup += inputString.substr(posLeft+1, posRight - posLeft-1);
+
+                prev = posRight+1;
+            }
+
+            strDup += inputString.substr(prev);
+
+
+            inputString = strDup;
+        }
+        return 0;
+    }
+
 
     static int removeBackslash(string &str) {
         str.erase(std::remove(str.begin(), str.end(), '\\'), str.end());
@@ -214,17 +285,24 @@ public:
 
         vector<pair<int, int> > rangeVector;
 
-        nRet = processComment(inputString, bValid, rangeVector, bNeedQuotationCheck);
+        nRet = processBracket(inputString);
+        if (nRet) {
+            return nRet;
+        }
+
+
+        nRet = processComment(inputString, rangeVector, bNeedQuotationCheck);
         if (nRet) {
             return nRet;
         }
 
         if (bNeedQuotationCheck) {
-            nRet = processQuotation(inputString, bValid, rangeVector);
+            nRet = processQuotation(inputString,rangeVector);
             if (nRet) {
                 return nRet;
             }
         }
+
 
         if (!rangeVector.empty()) {
             reverse(rangeVector.begin(), rangeVector.end());

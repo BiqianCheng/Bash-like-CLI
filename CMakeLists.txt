@@ -8,9 +8,9 @@ ADD_SUBDIRECTORY(googletest)
 
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall ")
 
-set(HEADERS header/CBase.h header/CConnector.h header/CAndConnector.h header/CCommand.h header/COrConnector.h header/CSeparatorConnector.h header/CRdirConnector.h header/CPipeConnector.h header/CRunMode.h header/CParser.h)
-set(SOURCES src/main.cpp )
-set(TESTING unit_tests/all_unit_tests.cpp)
+set(HEADERS header/CBase.h header/CConnector.h header/CAndConnector.h header/CCommand.h header/COrConnector.h header/CSeparatorConnector.h header/CRdirConnector.h header/CPipeConnector.h header/CRunMode.h header/CParser.h header/CTestCmd.h)
+set(SOURCES src/main.cpp src/CCommand.cpp)
+set(TESTING unit_tests/all_unit_tests.cpp src/CCommand.cpp)
 
 ADD_EXECUTABLE(rshell
         ${HEADERS} ${SOURCES})

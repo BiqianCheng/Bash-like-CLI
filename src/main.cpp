@@ -16,9 +16,70 @@
 
 //#define _MY_DEBUG
 
-//#define USE_INTERNAL_DEBUG
+#define USE_INTERNAL_DEBUG
 
 using namespace std;
+
+CRunMode::RunningMode  CRunMode::nMode = CRunMode::R_NORMAL;
+
+CConnector *parseLineToExecutor(const string &inputConstString);
+
+/*
+ * Parser command
+ *
+ */
+int parser() {
+    int nRet = 0;
+    CConnector *pUltimateConnector = nullptr;
+    //vector<string> wordVector;
+
+    string strInput;
+    cout << "$";
+
+#ifdef USE_INTERNAL_DEBUG
+    static int nCnt = 0;
+#else
+    static int nCnt = 1;
+#endif
+
+    if (!nCnt) {
+        //strInput = "echo \"       # other\"";
+        //strInput = "echo         # other";
+        //strInput = "echo    z     # other";
+        //strInput = "echo    \"# one\"  \"# two\"  ";
+        //strInput = "echo    \\\" orphan  ";
+        //strInput = "echo    \" \\\"# one\\\"  \"# two\"  ";
+        //strInput = "echo \"------------Commented Command Tests------------\"";
+        //strInput = "echo aa;echo bb;";
+        //strInput = "ls > 1.txt";
+        //strInput = "tr a-z A-Z < 1.txt";
+        //strInput = "ls -l | wc -l";
+        //strInput = "echo one && echo two; ";
+        //strInput = "echo one";
+        //strInput = "test -e test/file/path && echo “path exists”";
+        //strInput = "[ -e test/file/path ] && echo “path exists”";
+        //strInput = "[ -f rshell ] && echo \"file exists\"";
+        strInput = "[ -f rshell ] && test -e test/file/path ";
+    } else {
+        getline(cin, strInput);
+    }
+
+    nCnt++;
+
+    //parseLineToExecutor(strInput, wordVector);
+    pUltimateConnector = parseLineToExecutor(strInput);
+
+    if (pUltimateConnector) {
+        pUltimateConnector->execute();
+
+        CConnector::cleanIt(pUltimateConnector);
+        pUltimateConnector = nullptr;
+    }
+
+
+    return nRet;
+}
+
 
 //class CException {
 //
@@ -142,60 +203,8 @@ CConnector *parseLineToExecutor(const string &inputConstString) {
 }
 
 
-/*
- * Parser command
- *
- */
-int parser() {
-    int nRet = 0;
-    CConnector *pUltimateConnector = nullptr;
-    //vector<string> wordVector;
-
-    string strInput;
-    cout << "$";
-
-#ifdef USE_INTERNAL_DEBUG
-    static int nCnt = 0;
-#else
-    static int nCnt = 1;
-#endif
-    
-    if (!nCnt) {
-        //strInput = "echo \"       # other\"";
-        //strInput = "echo         # other";
-        //strInput = "echo    z     # other";
-        strInput = "echo    \"# one\"  \"# two\"  ";
-        //strInput = "echo    \\\" orphan  ";
-        //strInput = "echo    \" \\\"# one\\\"  \"# two\"  ";
-        //strInput = "echo \"------------Commented Command Tests------------\"";
-        //strInput = "echo aa;echo bb;";
-        //strInput = "ls > 1.txt";
-        //strInput = "tr a-z A-Z < 1.txt";
-        //strInput = "ls -l | wc -l";
-        //strInput = "echo one && echo two; ";
-        //strInput = "echo one";
-    } else {
-        getline(cin, strInput);        
-    }
-
-    nCnt++;
-
-    //parseLineToExecutor(strInput, wordVector);
-    pUltimateConnector = parseLineToExecutor(strInput);
-
-    if (pUltimateConnector) {
-        pUltimateConnector->execute();
-
-        CConnector::cleanIt(pUltimateConnector);
-        pUltimateConnector = nullptr;
-    }
 
 
-    return nRet;
-}
-
-
-CRunMode::RunningMode  CRunMode::nMode = CRunMode::R_NORMAL;
 
 /*
  * The main part of the rshell
