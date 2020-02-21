@@ -174,7 +174,18 @@ CConnector *parseLineToExecutor(const string &inputConstString) {
             CPipeConnector *pTempConnector = new CPipeConnector();
             ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
             cmdArgVector.clear();
-        } else {
+            
+        }  else if (token == "(") {
+            
+            
+        }  else if (token == ")") {
+
+            CConnector *pTempConnector = new CConnector();
+            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
+            cmdArgVector.clear();
+        }
+        
+        else {
             cmdArgVector.push_back(token);
         }
     }
