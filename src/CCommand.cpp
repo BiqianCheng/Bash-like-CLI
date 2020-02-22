@@ -159,6 +159,10 @@ void CCommand::runNormalCommand(char **argv, int fdIn, int fdOut, int &nRet) {
     int status = 0;
     int fdNewIn = 0;
 
+
+    //cout << "Run "<< argv[0]<<endl;
+
+
     cpid = fork();
 
     if (cpid == -1) {
@@ -218,7 +222,8 @@ void CCommand::runNormalCommand(char **argv, int fdIn, int fdOut, int &nRet) {
             doRdirOut();
         } else {
             if (!CRunMode::isTestingMode()) {
-                cout << strOutData;
+                cout << strOutData<<std::flush;
+                strOutData = "";
             }
         }
 

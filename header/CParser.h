@@ -396,13 +396,13 @@ public:
         size_t prev = 0;
         size_t pos = 0;
 
-        pos = tokenChunk.find_first_of(";<>&|", 0);
+        pos = tokenChunk.find_first_of(";<>&|()", 0);
         if (pos == string::npos) {
             wordVector.push_back(tokenChunk);
             return;
         }
 
-        while ((pos = tokenChunk.find_first_of(";<>&|", prev)) != string::npos) {
+        while ((pos = tokenChunk.find_first_of(";<>&|()", prev)) != string::npos) {
             c = tokenChunk[pos];
 
             strGenuine = tokenChunk.substr(prev, pos - prev);

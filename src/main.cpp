@@ -22,7 +22,7 @@ using namespace std;
 
 CRunMode::RunningMode  CRunMode::nMode = CRunMode::R_NORMAL;
 
-CConnector *parseLineToExecutor(const string &inputConstString);
+CConnector *parseLineToExecutor(const string &inputConstString,  CConnector * pRHS);
 
 /*
  * Parser command
@@ -56,10 +56,20 @@ int parser() {
         //strInput = "ls -l | wc -l";
         //strInput = "echo one && echo two; ";
         //strInput = "echo one";
-        //strInput = "test -e test/file/path && echo “path exists”";
-        //strInput = "[ -e test/file/path ] && echo “path exists”";
+        //strInput = "test -e test/file/path && echo \"path exists\"";
+        //strInput = "[ -e test/file/path ] && echo \"path exists\"";
         //strInput = "[ -f rshell ] && echo \"file exists\"";
-        strInput = "[ -f rshell ] && test -e test/file/path ";
+        //strInput = "[ -f rshell ] && test -e test/file/path ";
+        //strInput = "(echo aa && echo bb) || (echo cc && echo dd)";
+        //strInput = "(echo aa && echo bb) && (echo cc || echo dd)";
+        //strInput = "(echo aa && echo bb) && (echo cc && echo dd)";
+        //strInput = "(echo aa || echo bb) && (echo cc || echo dd)";
+        //strInput = "(echo aa || echo bb) && (echo cc && (echo dd && echo ee))";
+        //strInput = "(echo aa || echo bb) && (echo cc && (echo dd && vvv))";
+        strInput = "(echo aa || echo bb) && (echo cc && (vvv || echo ee))";
+
+        //strInput = "(echo cc && (echo dd && echo ee) && (echo aa || echo bb) )";
+
     } else {
         getline(cin, strInput);
     }
@@ -67,7 +77,7 @@ int parser() {
     nCnt++;
 
     //parseLineToExecutor(strInput, wordVector);
-    pUltimateConnector = parseLineToExecutor(strInput);
+    pUltimateConnector = parseLineToExecutor(strInput, nullptr);
 
     if (pUltimateConnector) {
         pUltimateConnector->execute();
@@ -93,25 +103,38 @@ int parser() {
 /*
  * Create connectors with original connectors and incoming commands
  */
-void ConnectorStackOp(vector<CConnector *> &connectorVector, CConnector *pTempConnector, vector<string> &cmdArgVector) {
+void ConnectorStackOp(vector<CConnector *> &connectorVector, CConnector *pTempConnector, vector<string> &cmdArgVector,
+                      int &nLevel, bool bClosed) {
 
-    CCommand *pCmd;
-    pCmd = new CCommand();
+    CCommand *pCmd = nullptr;
 
-    for (int i = 0; i < cmdArgVector.size(); i++) {
-        pCmd->vecToken.push_back(cmdArgVector[i]);
+    if(cmdArgVector.size()) {
+        pCmd = new CCommand();
+
+        for (int i = 0; i < cmdArgVector.size(); i++) {
+            pCmd->vecToken.push_back(cmdArgVector[i]);
+        }
     }
 
     if (connectorVector.empty()) {
+        if(!pTempConnector)
+            pTempConnector = new CConnector;
+
         pTempConnector->leftSideItems = pCmd;
         connectorVector.push_back(pTempConnector);
+
     } else {
         CConnector *pTop = connectorVector.back();
         connectorVector.pop_back();
 
-        pTop->rightSideItems = pCmd;
+        if(pCmd)
+            pTop->rightSideItems = pCmd;
+
+        if(!pTempConnector)
+            pTempConnector = new CConnector;
 
         pTempConnector->leftSideItems = pTop;
+
         connectorVector.push_back(pTempConnector);
     }
 }
@@ -119,10 +142,14 @@ void ConnectorStackOp(vector<CConnector *> &connectorVector, CConnector *pTempCo
 /*
  * Parse the string into executor
  */
-CConnector *parseLineToExecutor(const string &inputConstString) {
+CConnector *parseLineToExecutor(const string &inputConstString, CConnector * pRHS) {
     int pos = 0;
+    int nLevel = 0;
     string token;
+    string strChild[256];
+
     vector<string> wordVector;
+
     vector<string> cmdArgVector;
     vector<CConnector *> connectorVector;
 
@@ -140,71 +167,111 @@ CConnector *parseLineToExecutor(const string &inputConstString) {
         token = wordVector.back();
         wordVector.pop_back();
 
-        if (token == "&&") {
+        if(nLevel) {
 
-            CAndConnector *pTempConnector = new CAndConnector();
-            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
-            cmdArgVector.clear();
+            if (token == "(") {
 
-        } else if (token == "||") {
+                nLevel++;
 
-            COrConnector *pTempConnector = new COrConnector();
-            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
-            cmdArgVector.clear();
+            } else if (token == ")") {
 
-        } else if (token == ";") {
+                CConnector * pChild = parseLineToExecutor(strChild[nLevel], NULL);
+                strChild[nLevel].clear();
+                nLevel--;
 
-            CSeparatorConnector *pTempConnector = new CSeparatorConnector();
-            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
-            cmdArgVector.clear();
+                while(nLevel) {
+                    pChild = parseLineToExecutor(strChild[nLevel], pChild );
+                    nLevel--;
+                }
 
-        } else if (token == "<" || token == "<<") {
+                if (connectorVector.size()) {
+                    CConnector *pTop = connectorVector.back();
 
-            CRdirInConnector *pTempConnector = new CRdirInConnector();
-            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
-            cmdArgVector.clear();
+                    pTop->rightSideItems = pChild;
+                } else {
+                    connectorVector.push_back(pChild);
+                }
 
-        } else if (token == ">" || token == ">>") {
-            CRdirOutConnector *pTempConnector = new CRdirOutConnector();
-            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
-            cmdArgVector.clear();
-
-        } else if (token == "|") {
-
-            CPipeConnector *pTempConnector = new CPipeConnector();
-            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
-            cmdArgVector.clear();
-            
-        }  else if (token == "(") {
-            
-            
-        }  else if (token == ")") {
-
-            CConnector *pTempConnector = new CConnector();
-            ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
-            cmdArgVector.clear();
+            }
+            else{
+                strChild[nLevel] += token;
+                strChild[nLevel] += " ";
+            }
         }
-        
-        else {
-            cmdArgVector.push_back(token);
+        else{
+
+            if (token == "&&") {
+
+                CAndConnector *pTempConnector = new CAndConnector();
+                ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector, nLevel,false);
+                cmdArgVector.clear();
+
+            } else if (token == "||") {
+
+                COrConnector *pTempConnector = new COrConnector();
+                ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector, nLevel,false);
+                cmdArgVector.clear();
+
+            } else if (token == ";") {
+
+                CSeparatorConnector *pTempConnector = new CSeparatorConnector();
+                ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector, nLevel,false);
+                cmdArgVector.clear();
+
+            } else if (token == "<" || token == "<<") {
+
+                CRdirInConnector *pTempConnector = new CRdirInConnector();
+                ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector, nLevel,false);
+                cmdArgVector.clear();
+
+            } else if (token == ">" || token == ">>") {
+                CRdirOutConnector *pTempConnector = new CRdirOutConnector();
+                ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector, nLevel,false);
+                cmdArgVector.clear();
+
+            } else if (token == "|") {
+
+                CPipeConnector *pTempConnector = new CPipeConnector();
+                ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector, nLevel,false);
+                cmdArgVector.clear();
+
+            } else if (token == "(") {
+
+                nLevel++;
+
+            } else if (token == ")") {
+
+                //nLevel--;
+            } else {
+                cmdArgVector.push_back(token);
+            }
         }
     }
-
-
 
     if (!cmdArgVector.empty()) {
-        CConnector *pTempConnector = new CConnector;
-        ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector);
-        pUltimateConnector = pTempConnector;
+        //CConnector *pTempConnector = new CConnector;
+        //ConnectorStackOp(connectorVector, pTempConnector, cmdArgVector, nLevel, false);
+        //pUltimateConnector = pTempConnector;
+        ConnectorStackOp(connectorVector, nullptr, cmdArgVector, nLevel, false);
     }
-    else{
-        if(!connectorVector.empty()) {
-            CConnector *pTempConnector = connectorVector.back();
-            pUltimateConnector = pTempConnector;
+
+
+    if (!connectorVector.empty()) {
+        CConnector *pTempConnector = connectorVector.back();
+        pUltimateConnector = pTempConnector;
+    } else { // empty command
+        CConnector *pTempConnector = new CConnector();
+        pUltimateConnector = pTempConnector;
+        //cout << "Empty connector!"<<endl;
+    }
+
+
+    if(pRHS){
+        if(!pUltimateConnector->rightSideItems){
+            pUltimateConnector->rightSideItems = pRHS;
         }
-        else{ // empty command
-            CConnector *pTempConnector = new CConnector();
-            pUltimateConnector = pTempConnector;
+        else{
+            cout << "Nested error."<<endl;
         }
     }
 
@@ -212,9 +279,6 @@ CConnector *parseLineToExecutor(const string &inputConstString) {
 
     return pUltimateConnector;
 }
-
-
-
 
 
 /*
