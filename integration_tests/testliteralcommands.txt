@@ -1,18 +1,15 @@
-(echo "----------Test Symbolic Tests----------")
-test rshell
-                      test test_literal_tests.sh
-(test ../rshell)
-((test hello) || echo "Hello is runnable?")
-ls; test -d ../src;
-(((((test src)))))
+(echo "----------Test Literal Tests----------")
 (echo "----------In current directory----------" &&(pwd))
 (echo "The content of this directory are") && (ls)
-test -e rshell || echo "rshell executable missing";
-test -e test || echo "test executable missing";
-(test -e /names.txt ||(echo "names.txt file missing"))
-(test -d unit_tests) || (echo "unit_tests is missing");
+test rshell
+            test test_literal_tests.sh
+(test ../rshell)
+((test somecmd) || echo "somecmd exists.")
+ls; test -d ../src;
+(((((test src)))))
 (echo "----------In upper directory----------")
-test -e ../rshell || echo "rshell executable missing"
-test -e ../test ||(echo "test executable is missing");
-echo this is a test
+test -e ../rshell && echo "Found rshell "
+test -e ../test && (echo "Found test");
+(test -e ../names.txt && (echo "Found names.txt")
+(test -d ../unit_tests) && (echo "Found unit_tests");
 exit

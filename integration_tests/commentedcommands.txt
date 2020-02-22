@@ -1,0 +1,23 @@
+echo "------------Commented Command Tests------------"
+echo "echo       # other"
+echo       # other
+echo "       # other"
+         # other
+echo "echo \"Simple Quotations\"  "
+echo "Simple Quotations"
+echo "echo Quotations with backslash "
+echo \"Simple Quotation\"
+echo "echo one# && echo two"
+echo one# && echo two
+echo "echo #"
+echo #
+echo "#"
+#
+echo " ;#"
+ ;#
+echo "echo \"in the middle\" # \" of a quote\" "
+echo "in the middle # of a quote"
+echo "in the middle" # "of a quote"
+echo "echo after a semicolon;#"
+echo after a semicolon;#
+exit

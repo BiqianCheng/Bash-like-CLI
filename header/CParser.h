@@ -13,10 +13,123 @@ using namespace std;
 class CParser {
 public:
 
+    // Analyze the complexity
+    // 1 - Comment only  2 - Quotations only
+    static int analyzeComplexity(const string &inputString){
+        int nResult = 0;
+
+        size_t posPound = inputString.find_first_of("#", 0);
+        if (posPound != string::npos) {
+            nResult |= 1;
+        }
+
+        size_t posPrev = 0;
+        size_t posQuotation = 0;
+
+//        do{
+//            posQuotation = inputString.find_first_of("\"", posPrev);
+//            if(posQuotation==string::npos)
+//                break;
+//
+//            if(posQuotation>=1){
+//                if(inputString[posQuotation-1]=='\\') {
+//                    nResult |= 4;
+//                    break;
+//                } else{
+//                    nResult |= 2;
+//                }
+//            }
+//
+//            posPrev = posQuotation+1;
+//
+//        }while(posQuotation!=string::npos);
+
+        posQuotation = inputString.find_first_of("\"", posPrev);
+        if(posQuotation==string::npos)
+            nResult |= 2;
+
+        return nResult;
+    }
+
+    /*
+     * Remove comment only. Remove the part after the pound symbol.
+     */
+    static int removeCommentOnly(string &inputString) {
+
+        size_t posPound = inputString.find_first_of("#", 0);
+        if (posPound != string::npos) {
+            inputString = inputString.substr(0, posPound);
+        }
+
+        return 0;
+    }
+
+
+    /*
+     * Mark quotations only. The part between quotations will be treated as a complete token.
+     */
+    static int markQuotationsOnly(string &inputString, vector<pair<int, int> > &rangeVector) {
+
+        size_t prev = 0;
+        size_t pos = 0;
+
+        size_t posLeft = 0;
+        size_t posRight = 0;
+
+        size_t posTemp = 0;
+
+        char t = 0;
+        char c = 0;
+
+        int unpaired = 0;
+
+        do {
+            pos = inputString.find_first_of("\"", prev);
+            if (pos == string::npos) {
+                break;
+            }
+
+            c = inputString[pos];
+
+            if (pos >= 1) {
+                t = inputString[pos - 1];
+                if (t == '\\') {
+                    prev = pos + 1;
+                    continue;
+                }
+            }
+
+            if (!unpaired ) {
+                unpaired = 1;
+                posTemp = pos;
+             }
+            else{
+
+                unpaired = 0;
+
+                posLeft = posTemp;
+                posRight = pos;
+
+                rangeVector.push_back(make_pair(posLeft, posRight));
+            }
+
+            prev = pos + 1;
+
+        } while (pos != string::npos);
+
+        if (unpaired) {
+            cout << "Unpaired quotations!" << "Last found left at " << posTemp << endl;
+            return __LINE__;
+        }
+
+        return 0;
+    }
+
+
     /*
      * Remove comments before output
      */
-    static int processComment(string &inputString,vector<pair<int, int> > &rangeVector, bool &bNeed) {
+    static int processComment(string &inputString, vector<pair<int, int> > &rangeVector, bool &bNeedOtherCheck) {
         size_t prev = 0;
         size_t posPound = 0;
         size_t posLast = 0;
@@ -25,22 +138,33 @@ public:
         char c = 0;
         char t = 0;
 
-        bNeed = false;
+        bNeedOtherCheck = false;
+
+        int nCount = 0;
 
         // Remove comment
         do {
             posPound = inputString.find_first_of("#", prev);
+
             if (posPound != string::npos) {
                 size_t posLeft = 0;
                 size_t posRight = 0;
                 if (posPound) {
                     posLeft = inputString.find_first_of("\"", prev);
+
+
                     if ((posLeft != string::npos) && (posLeft < posPound)) {
 
                         if (posLeft >= 1) {
                             if (inputString[posLeft - 1] == '\\') {
 
                                 prev = posLeft + 1;
+
+                                if (!nCount)
+                                    nCount = 1;
+                                else
+                                    nCount = 0;
+
                                 continue;
                             }
                         }
@@ -77,7 +201,7 @@ public:
                 }
             } else { // No comment at all
                 bDone = true;
-                bNeed = true;
+                bNeedOtherCheck = true;
                 break;
             }
         } while (!bDone);
@@ -100,7 +224,7 @@ public:
         size_t posRight = 0;
         const size_t len = inputString.length();
 
- //       size_t posLeftOld = 0;
+        //       size_t posLeftOld = 0;
 //        size_t posRightOld = 0;
 
         size_t posTemp = 0;
@@ -116,14 +240,14 @@ public:
 //                posLeft = pos;
                 if (pos >= 1) {
                     t = inputString[pos - 1];
-                    if ( t == '\\') {
+                    if (t == '\\') {
 
                         prev = pos + 1;
                         continue;
                     }
                 }
 
-                if(unpaired==0) {
+                if (unpaired == 0) {
                     unpaired = 1;
 
                     prev = pos + 1;
@@ -165,8 +289,8 @@ public:
 
         string strDup;
 
-        char chCurSymbol=0;
-        char chTemp=0;
+        char chCurSymbol = 0;
+        char chTemp = 0;
 
         size_t prev = 0;
         size_t pos = 0;
@@ -192,31 +316,30 @@ public:
 
                 if (pos >= 1) {
                     t = inputString[pos - 1];
-                    if ( t == '\\') {
+                    if (t == '\\') {
 
                         prev = pos + 1;
                         continue;
                     }
                 }
 
-                if(posVector.empty()) {
+                if (posVector.empty()) {
                     posVector.push_back(pos);
-                    prev = pos+1;
+                    prev = pos + 1;
                     continue;
                 }
 
-               if(chCurSymbol == '['){
-                   posVector.push_back(pos);
-               }
-               else if(chCurSymbol == ']'){
+                if (chCurSymbol == '[') {
+                    posVector.push_back(pos);
+                } else if (chCurSymbol == ']') {
 
-                   tempPos = posVector.back();
-                   posVector.pop_back();
+                    tempPos = posVector.back();
+                    posVector.pop_back();
 
-                   rangeVector.push_back(make_pair(tempPos, pos));
-               }
+                    rangeVector.push_back(make_pair(tempPos, pos));
+                }
 
-                prev = pos+1;
+                prev = pos + 1;
 
             } else {
                 bDone = true;
@@ -231,19 +354,19 @@ public:
 
 
         prev = 0;
-        if(!rangeVector.empty()){
+        if (!rangeVector.empty()) {
 
-            for(int i=0;i<rangeVector.size();i++){
+            for (int i = 0; i < rangeVector.size(); i++) {
 
-                pair<int, int>  pr = rangeVector[i];
+                pair<int, int> pr = rangeVector[i];
                 posLeft = pr.first;
                 posRight = pr.second;
 
-                strDup += inputString.substr(prev, posLeft-prev);
+                strDup += inputString.substr(prev, posLeft - prev);
                 strDup += "test ";
-                strDup += inputString.substr(posLeft+1, posRight - posLeft-1);
+                strDup += inputString.substr(posLeft + 1, posRight - posLeft - 1);
 
-                prev = posRight+1;
+                prev = posRight + 1;
             }
 
             strDup += inputString.substr(prev);
@@ -297,7 +420,7 @@ public:
         }
 
         if (bNeedQuotationCheck) {
-            nRet = processQuotation(inputString,rangeVector);
+            nRet = processQuotation(inputString, rangeVector);
             if (nRet) {
                 return nRet;
             }
@@ -317,7 +440,7 @@ public:
                 if (pos)
                     pr = line[pos - 1];
 
-                if ((pos > prev) || (pos == prev && t != c)) {
+                if ((pos > prev) || (pos == prev && pos > 0 && t != c)) {
                     tokenTemp = line.substr(prev, pos - prev);
                     len = tokenTemp.length();
 

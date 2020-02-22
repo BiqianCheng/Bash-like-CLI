@@ -22,7 +22,7 @@ private:
                     nMode = j;
                     found = true;
 
-					path = vecToken[size-1-i].c_str();
+					path = vecToken[size-i].c_str();
 
                     break;
                 }
@@ -31,7 +31,7 @@ private:
 
         if(!found) { //If no flag found, assume file is at pos 1
 			nMode = 0;
-		 	path = vecToken[0].c_str();
+		 	path = vecToken[1].c_str();
 		}
     }
 
