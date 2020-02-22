@@ -1,7 +1,6 @@
 #ifndef RSHELL_CTESTCMD_H
 #define RSHELL_CTESTCMD_H
 
-
 #include <sys/stat.h>
 #include <iostream>
 
@@ -9,11 +8,8 @@
 
 
 class CTestCmd : public CCommand {
-private:
-
-
-    // -e 0, -f 1, -d 2
-    int nMode;
+private:    
+    int nMode;  // -e 0, -f 1, -d 2
     const char* path;
     const string strModes[3] = {"-e","-f","-d"};
 
@@ -25,16 +21,18 @@ private:
                 if(strModes[j] == vecToken[i]) {
                     nMode = j;
                     found = true;
+
+					path = vecToken[size-1-i].c_str();
+
                     break;
                 }
             }
         }
 
         if(!found) { //If no flag found, assume file is at pos 1
-            path = (vecToken[1]).c_str();
-        } else { // Else file is at pos 2
-            path = (vecToken[2]).c_str();
-        }
+			nMode = 0;
+		 	path = vecToken[0].c_str();
+		}
     }
 
 public:
