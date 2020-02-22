@@ -27,6 +27,9 @@ public:
         CConnector *pConnector = nullptr;
         CCommand *pCommand = nullptr;
 
+        if(!pBase)
+            return;
+        
         pConnector = dynamic_cast<CConnector *>(pBase);
         if (pConnector) {
             CBase *pL = pConnector->leftSideItems;
@@ -40,18 +43,20 @@ public:
                 CConnector::cleanIt(pR);
                 pR = nullptr;
             }
+            
+            delete pConnector;
+            pBase = nullptr;            
         } else {
             pCommand = dynamic_cast<CCommand *>(pBase);
             if (pCommand) {
                 delete pCommand;
                 pBase = nullptr;
             }
-        }
-
-        if (pBase) {
-            delete pBase;
-            pBase = nullptr;
-        }
+            else if (pBase) {
+                delete pBase;
+                pBase = nullptr;
+            }
+        }        
     }
 
     virtual void cleanup() {
