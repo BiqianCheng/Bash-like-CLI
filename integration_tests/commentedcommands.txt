@@ -5,7 +5,7 @@ echo "       # other"
          # other
 echo "echo \"Simple Quotations\"  "
 echo "Simple Quotations"
-echo "echo Quotations with backslash "
+echo "Quotations with backslash "
 echo \"Simple Quotation\"
 echo "echo one# && echo two"
 echo one# && echo two

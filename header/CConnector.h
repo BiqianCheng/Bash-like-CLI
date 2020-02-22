@@ -20,7 +20,7 @@ public:
     }
 
     virtual ~CConnector() {
-        cleanup();
+        //cleanup();
     }
 
     static void cleanIt(CBase *pBase) {
@@ -62,10 +62,12 @@ public:
     virtual void cleanup() {
         if (leftSideItems) {
             CConnector::cleanIt(leftSideItems);
+            leftSideItems = nullptr;
         }
 
         if (rightSideItems) {
             CConnector::cleanIt(rightSideItems);
+            rightSideItems = nullptr;
         }
     }
 
