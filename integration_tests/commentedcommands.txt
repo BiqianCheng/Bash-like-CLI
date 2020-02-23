@@ -1,4 +1,7 @@
 echo "------------Commented Command Tests------------"
+echo \"12345"------"6789\" "two" "three"
+echo \"9876"------"54321\" \"Q1\" \"Q2\"
+echo "1234\"--------\"5678"
 echo "echo       # other"
 echo       # other
 echo "       # other"

@@ -7,6 +7,7 @@
 #include <cstring>
 #include <algorithm>
 #include <iostream>
+#include <unordered_map>
 
 using namespace std;
 
@@ -15,7 +16,7 @@ public:
 
     // Analyze the complexity
     // 1 - Comment only  2 - Quotations only
-    static int analyzeComplexity(const string &inputString){
+    static int analyzeComplexity(const string &inputString) {
         int nResult = 0;
 
         size_t posPound = inputString.find_first_of("#", 0);
@@ -45,7 +46,7 @@ public:
 //        }while(posQuotation!=string::npos);
 
         posQuotation = inputString.find_first_of("\"", posPrev);
-        if(posQuotation==string::npos)
+        if (posQuotation == string::npos)
             nResult |= 2;
 
         return nResult;
@@ -66,213 +67,161 @@ public:
 
 
     /*
-     * Mark quotations only. The part between quotations will be treated as a complete token.
+     * Remove comments before output
      */
-    static int markQuotationsOnly(string &inputString, vector<pair<int, int> > &rangeVector) {
-
-        size_t prev = 0;
-        size_t pos = 0;
+    static int processComment(string &inputString, bool &bNeedOtherCheck) {
+        size_t prevPound = 0;
+        size_t posPound = 0;
 
         size_t posLeft = 0;
         size_t posRight = 0;
 
-        size_t posTemp = 0;
-
-        char t = 0;
-        char c = 0;
-
-        int unpaired = 0;
-
-        do {
-            pos = inputString.find_first_of("\"", prev);
-            if (pos == string::npos) {
-                break;
-            }
-
-            c = inputString[pos];
-
-            if (pos >= 1) {
-                t = inputString[pos - 1];
-                if (t == '\\') {
-                    prev = pos + 1;
-                    continue;
-                }
-            }
-
-            if (!unpaired ) {
-                unpaired = 1;
-                posTemp = pos;
-             }
-            else{
-
-                unpaired = 0;
-
-                posLeft = posTemp;
-                posRight = pos;
-
-                rangeVector.push_back(make_pair(posLeft, posRight));
-            }
-
-            prev = pos + 1;
-
-        } while (pos != string::npos);
-
-        if (unpaired) {
-            cout << "Unpaired quotations!" << "Last found left at " << posTemp << endl;
-            return __LINE__;
-        }
-
-        return 0;
-    }
-
-
-    /*
-     * Remove comments before output
-     */
-    static int processComment(string &inputString, vector<pair<int, int> > &rangeVector, bool &bNeedOtherCheck) {
-        size_t prev = 0;
-        size_t posPound = 0;
-        size_t posLast = 0;
+        size_t prevLeft = 0;
+        size_t prevRight = 0;
 
         bool bDone = false;
         char c = 0;
         char t = 0;
 
-        bNeedOtherCheck = false;
-
         int nCount = 0;
 
-        // Remove comment
         do {
-            posPound = inputString.find_first_of("#", prev);
+            posPound = inputString.find_first_of("#", prevPound);
 
-            if (posPound != string::npos) {
-                size_t posLeft = 0;
-                size_t posRight = 0;
-                if (posPound) {
-                    posLeft = inputString.find_first_of("\"", prev);
-
-
-                    if ((posLeft != string::npos) && (posLeft < posPound)) {
-
-                        if (posLeft >= 1) {
-                            if (inputString[posLeft - 1] == '\\') {
-
-                                prev = posLeft + 1;
-
-                                if (!nCount)
-                                    nCount = 1;
-                                else
-                                    nCount = 0;
-
-                                continue;
-                            }
-                        }
-
-                        posLast = posPound;
-                        do {
-                            posRight = inputString.find_first_of("\"", posLast + 1);
-                            if (posRight == string::npos) {
-                                cout << "Unpaired quotations and comment symbol!" << "Last found at " << posLeft
-                                     << endl;
-                                return __LINE__;
-                            }
-
-                            if (inputString[posRight - 1] == '\\') {
-                                posLast = posRight + 1;
-                            } else {
-                                break;
-                            }
-
-                        } while (posRight != string::npos);
-
-                        //inputString.substr(posLeft, posRight-posLeft+1);
-                        rangeVector.push_back(make_pair(posLeft, posRight));
-
-                        prev = posRight + 1;
-
-                    } else { // Just extract the preceding
-                        inputString = inputString.substr(0, posPound);
-                        bDone = true;
-                        break;
-                    }
-                } else { // Only one pound at the first one
-                    return __LINE__;
-                }
-            } else { // No comment at all
+            if (posPound == string::npos) {
                 bDone = true;
                 bNeedOtherCheck = true;
                 break;
             }
+
+            if (!posPound) {
+                bDone = true;
+                bNeedOtherCheck = false;
+                inputString = "";
+                break;
+            }
+
+            nCount = 0;
+            prevLeft = 0;
+
+            do {
+                posLeft = inputString.find_first_of("\"", prevLeft);
+
+                if (posLeft == string::npos || posLeft >= posPound) {
+                    break;
+                }
+
+                if (posLeft >= 1) {
+                    if (inputString[posLeft - 1] == '\\') {
+
+                    } else {
+                        nCount++;
+                    }
+                }
+
+                prevLeft = posLeft + 1;
+
+            } while (posLeft != string::npos);
+
+            // All quotations on left sides
+            if (nCount % 2 == 0) {
+                inputString = inputString.substr(0, posPound);
+                bDone = true;
+                bNeedOtherCheck = true;
+                break;
+            }
+
+            prevRight = posPound;
+
+            do {
+                posRight = inputString.find_first_of("\"", prevRight);
+                if (posRight == string::npos) {
+
+                    break;
+                }
+
+                if (inputString[posRight - 1] == '\\') {
+
+                } else {
+                    nCount++;
+
+                    break;
+                }
+
+                prevRight = posRight + 1;
+
+            } while (posRight != string::npos);
+
+            if (nCount % 2) {
+                cout << "Unpaired quotations and comment symbol!" << "Last found at " << posLeft << endl;
+                return __LINE__;
+            }
+            prevPound = posRight + 1;
+
         } while (!bDone);
 
         return 0;
     }
 
     /*
-     * Skip quotations before output
+     * Mark inner part of quotations
      */
-    static int processQuotation(string &inputString, vector<pair<int, int> > &rangeVector) {
+    static int
+    processQuotation(string &inputString, vector<pair<int, int> > &rangeVector, vector<pair<int, int> > &rangeVectorB) {
         size_t prev = 0;
         size_t pos = 0;
+        size_t posLast = 0;
+
+        size_t prevB = 0;
 
         bool bDone = false;
         char c = 0;
-        char t = 0;
 
-        size_t posLeft = 0;
-        size_t posRight = 0;
-        const size_t len = inputString.length();
-
-        //       size_t posLeftOld = 0;
-//        size_t posRightOld = 0;
-
-        size_t posTemp = 0;
-
-        int unpaired = 0;
-        int nLast = 0;
+        int nCount = 0;
+        int nCountB = 0;
 
         do {
             pos = inputString.find_first_of("\"", prev);
-            if (pos != string::npos) {
-
-//                posLeftOld = posLeft;
-//                posLeft = pos;
-                if (pos >= 1) {
-                    t = inputString[pos - 1];
-                    if (t == '\\') {
-
-                        prev = pos + 1;
-                        continue;
-                    }
-                }
-
-                if (unpaired == 0) {
-                    unpaired = 1;
-
-                    prev = pos + 1;
-                    posTemp = pos;
-
-                    continue;
-                }
-
-                unpaired = 0;
-
-                posLeft = posTemp;
-                posRight = pos;
-
-                rangeVector.push_back(make_pair(posLeft, posRight));
-
-                prev = posRight + 1;
-
-            } else { // No quotation
+            if (pos == string::npos) {
                 bDone = true;
                 break;
             }
+
+            if (pos >= 1) {
+                if (inputString[pos - 1] == '\\') {
+
+                    nCountB++;
+
+                    if (nCountB && nCountB % 2 == 0) {
+                        rangeVectorB.push_back(make_pair(prevB, pos));
+                    }
+
+                    prevB = pos;
+                    prev = pos + 1;
+
+
+                    continue;
+                }
+            }
+
+            nCount++;
+
+            if (nCount && nCount % 2 == 0) {
+                rangeVector.push_back(make_pair(posLast, pos));
+            }
+
+            posLast = pos;
+            prev = pos + 1;
+
         } while (!bDone);
 
-        if (unpaired) {
-            cout << "Unpaired quotations!" << "Last found left at " << nLast << endl;
+        if (nCount % 2) {
+            cout << "Unpaired quotations!" << "Last found left at " << posLast << endl;
+            return __LINE__;
+        }
+
+        if (nCountB % 2) {
+            cout << "Unpaired escape quotations !" << "Last found left at " << prevB << endl;
             return __LINE__;
         }
 
@@ -323,12 +272,6 @@ public:
                     }
                 }
 
-                if (posVector.empty()) {
-                    posVector.push_back(pos);
-                    prev = pos + 1;
-                    continue;
-                }
-
                 if (chCurSymbol == '[') {
                     posVector.push_back(pos);
                 } else if (chCurSymbol == ']') {
@@ -347,11 +290,10 @@ public:
             }
         } while (!bDone);
 
-        if (unpaired) {
+        if (posVector.size()) {
             cout << "Unpaired brackets!" << "Last found left at " << nLast << endl;
             return __LINE__;
         }
-
 
         prev = 0;
         if (!rangeVector.empty()) {
@@ -371,7 +313,6 @@ public:
 
             strDup += inputString.substr(prev);
 
-
             inputString = strDup;
         }
         return 0;
@@ -382,6 +323,147 @@ public:
         str.erase(std::remove(str.begin(), str.end(), '\\'), str.end());
         return 0;
     }
+
+
+    static int extractInnerPart(const char pr, const string & line, string & tokenTemp, size_t & pos,  vector<pair<int, int> > &rangeVector,  vector<pair<int, int> > &rangeVectorB){
+
+        int nSearchMode = 0;
+
+        //string line = lineOrg;
+
+        vector<pair<int, int> >* pVecA;
+        vector<pair<int, int> >* pVecB;
+
+        size_t posLeft = 0;
+        size_t posRight = 0;
+
+        size_t posL = 0;
+        size_t posR = 0;
+
+        if (pr != '\\') {
+            nSearchMode = 0;
+            pVecA = &rangeVector;
+            pVecB = &rangeVectorB;
+        }
+        else{
+            nSearchMode = 1;
+            pVecA = &rangeVectorB;
+            pVecB = &rangeVector;
+        }
+
+        if (pVecA->empty()) {
+            cout << "ERR: empty!" << endl;
+            return __LINE__;
+        }
+
+
+        pair<int, int> rangeOne = pVecA->back();
+        pVecA->pop_back();
+
+        posLeft = rangeOne.first;
+        posRight = rangeOne.second;
+
+        if (posLeft != pos) {
+            cout << "ERR: inconsistent!" << endl;
+            return __LINE__;
+        }
+
+        pos = posRight;
+
+        // Omit preceding
+        if(nSearchMode==0){
+            posLeft += 1;
+            posRight -= 1;
+
+            tokenTemp = line.substr(posLeft, posRight - posLeft + 1);
+        }
+        else{
+            posRight -= 2;
+            tokenTemp = line.substr(posLeft, posRight - posLeft + 1);
+            tokenTemp += "\"";
+        }
+
+
+        //--------------------------------------------------
+        unordered_map <int, bool> mapRM;
+
+
+        for(int i=0;i<pVecB->size();i++){
+
+            pair<int, int> rangeIn = pVecB->at(i);
+
+            posL = rangeIn.first;
+            posR = rangeIn.second;
+
+            if(posL > posLeft && posR < posRight ){
+
+                if(nSearchMode==0){
+
+                    int nSubPos = 0;
+                    int nSubLen = (posL-1) - posLeft ;
+
+                    string strA = tokenTemp.substr(nSubPos, nSubLen);
+
+                    nSubPos = posL - posLeft;
+                    nSubLen = (posR-1) - posL ;
+
+                    string strB = tokenTemp.substr(nSubPos, nSubLen);
+
+
+                    nSubPos = posR- posLeft;
+                    nSubLen = posRight-posR+1;
+
+                    string strC = tokenTemp.substr(nSubPos, nSubLen);
+
+                    tokenTemp = strA + strB + strC;
+                }
+                else{
+
+                    int nSubPos = 0;
+                    int nSubLen = posL-posLeft ;
+
+                    string strA = tokenTemp.substr(nSubPos, nSubLen);
+
+                    nSubPos = posL - posLeft +1;
+                    nSubLen = (posR-1) - posL;
+
+                    string strB = tokenTemp.substr(nSubPos, nSubLen);
+
+
+                    nSubPos = posR+1-posLeft;
+                    nSubLen = posRight-posR;
+
+                    string strC = tokenTemp.substr(nSubPos, nSubLen);
+
+                    tokenTemp = strA + strB + strC+"\"";
+                }
+
+
+                //line[posL]=' ';
+                //line[posR]=' ';
+
+                mapRM[i] = true;
+            }
+        }
+
+        vector<pair<int, int>> vecPairTemp;
+
+        if(mapRM.size()){
+            int i;
+            for(i=0;i<pVecB->size();i++){
+
+                if(!mapRM[i])
+                    vecPairTemp.push_back(pVecB->at(i));
+            }
+
+            pVecB->clear();
+            *pVecB = vecPairTemp;
+        }
+
+        return 0;
+
+    }
+
 
     /*
      * Detect the tokens
@@ -401,85 +483,64 @@ public:
         bool bValid = false;
         bool bDone = false;
         bool bNeedQuotationCheck = false;
-        char c = 0;
-        char t = 0;
+        char chCurrent = 0;
+        char chPrev = 0;
         char pr = 0;
-        //vector<char> vecSpecialMark;
 
         vector<pair<int, int> > rangeVector;
+        vector<pair<int, int> > rangeVectorB;
 
         nRet = processBracket(inputString);
         if (nRet) {
             return nRet;
         }
 
-
-        nRet = processComment(inputString, rangeVector, bNeedQuotationCheck);
+        nRet = processComment(inputString, bNeedQuotationCheck);
         if (nRet) {
             return nRet;
         }
 
         if (bNeedQuotationCheck) {
-            nRet = processQuotation(inputString, rangeVector);
+            nRet = processQuotation(inputString, rangeVector, rangeVectorB);
             if (nRet) {
                 return nRet;
             }
         }
 
-
         if (!rangeVector.empty()) {
             reverse(rangeVector.begin(), rangeVector.end());
         }
 
+        if (!rangeVectorB.empty()) {
+            reverse(rangeVectorB.begin(), rangeVectorB.end());
+        }
+
         stringstream ss(inputString);
         while (getline(ss, line)) {
-            // Remove space
+
             while ((pos = line.find_first_of(" \"", prev)) != string::npos) {
                 bValid = false;
-                c = line[pos];
+                chCurrent = line[pos];
+
                 if (pos)
                     pr = line[pos - 1];
 
-                if ((pos > prev) || (pos == prev && pos > 0 && t != c)) {
+                if ((pos > prev) || (pos == prev && pos > 0 && chPrev != chCurrent)) {
+
                     tokenTemp = line.substr(prev, pos - prev);
                     len = tokenTemp.length();
 
-                    if (c == '"') {
-                        if (pr != '\\') {
-                            if (rangeVector.empty()) {
-                                cout << "ERR: empty!" << endl;
-                                return __LINE__;
-                            }
+                    if (chCurrent == '"') {
 
-                            size_t posLeft = 0;
-                            size_t posRight = 0;
-                            pair<int, int> rangeOne = rangeVector.back();
-                            rangeVector.pop_back();
+                        nRet = extractInnerPart(pr, line, tokenTemp, pos, rangeVector, rangeVectorB);
+                        if(nRet)
+                            return nRet;
 
-                            // Omit quotation
-                            posLeft = rangeOne.first;
-                            posRight = rangeOne.second;
-
-                            if (posLeft != pos) {
-                                cout << "ERR: inconsistent!" << endl;
-                                return __LINE__;
-                            }
-
-                            posLeft = rangeOne.first + 1;
-                            posRight = rangeOne.second - 1;
-
-                            tokenTemp = line.substr(posLeft, posRight - posLeft + 1);
-
-                            pos = posRight;
-                            prev = posRight + 1;
-
-                            bValid = true;
-                        } else {
-                            bValid = false;
-                            break;
-                        }
+                        bValid = true;
                     }
+                }
 
+                if(tokenTemp.length()){
                     if (len == 1 || bValid) {
                         wordVector.push_back(tokenTemp);
                     } else if (len == 2) {
@@ -492,7 +553,9 @@ public:
                         splitConsecutive(tokenTemp, wordVector);
                     }
                 }
-                t = c;
+
+
+                chPrev = chCurrent;
                 prev = pos + 1;
             }
 
@@ -506,10 +569,11 @@ public:
         return 0;
     }
 
-    /*
-     * Split the consecutive commands
-     */
-    static void splitConsecutive(string &tokenChunk, vector<string> &wordVector) {
+/*
+ * Split the consecutive commands
+ */
+    static
+    void splitConsecutive(string &tokenChunk, vector<string> &wordVector) {
 
         bool bToSplit = false;
         char c = 0;
@@ -561,9 +625,9 @@ public:
     }
 
 
-    /*
-     * Create the argument array
-     */
+/*
+ * Create the argument array
+ */
     static char **vectorToArgv(vector<string> &vecToken) {
         char **argv = nullptr;
         int size = vecToken.size();
@@ -584,34 +648,9 @@ public:
     }
 
 
-    static char **vectorToArgvWithExtra(vector<string> &vecToken, int nExtra, vector<string> &vecExtra) {
-        char **argv = nullptr;
-        int size = vecToken.size();
-
-        if (size) {
-            argv = new char *[size + 1 + nExtra];
-            argv[size + nExtra] = nullptr;
-
-            for (int i = 0; i < size; ++i) {
-
-                string itStr = vecToken[i];
-                argv[i] = new char[itStr.length() + 1];
-                strcpy(argv[i], itStr.c_str());
-            }
-
-            for (int j = size; j < size + nExtra; j++) {
-                string itStr = vecExtra[j];
-                argv[j] = new char[itStr.length() + 1];
-                strcpy(argv[j], itStr.c_str());
-            }
-        }
-
-        return argv;
-    }
-
-    /*
-     * Clean up the argument array
-     */
+/*
+ * Clean up the argument array
+ */
     static void cleanUpArgv(char **argv, int size) {
 
         // clean up
@@ -623,6 +662,7 @@ public:
         delete[] argv;
         argv = nullptr;
     }
+
 };
 
 

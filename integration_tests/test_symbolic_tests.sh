@@ -1,3 +1,3 @@
 #!/bin/sh
 
-.././rshell <testsymboliccommands.txt
+.././rshell < testsymboliccommands.txt

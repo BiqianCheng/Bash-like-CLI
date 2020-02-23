@@ -1,3 +1,3 @@
 #!/bin/sh
 
-.././rshell <precedencecommands.txt
+.././rshell < precedencecommands.txt

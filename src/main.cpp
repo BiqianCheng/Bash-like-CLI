@@ -16,7 +16,7 @@
 
 //#define _MY_DEBUG
 
-//#define USE_INTERNAL_DEBUG
+#define USE_INTERNAL_DEBUG
 
 using namespace std;
 
@@ -66,10 +66,23 @@ int parser() {
         //strInput = "(echo aa || echo bb) && (echo cc || echo dd)";
         //strInput = "(echo aa || echo bb) && (echo cc && (echo dd && echo ee))";
         //strInput = "(echo aa || echo bb) && (echo cc && (echo dd && vvv))";
-        strInput = "(echo aa || echo bb) && (echo cc && (vvv || echo ee))";
+        //strInput = "(echo aa || echo bb) && (echo cc && (vvv || echo ee))";
 
         //strInput = "(echo cc && (echo dd && echo ee) && (echo aa || echo bb) )";
 
+
+        //             echo \"12345"------"6789\" "two" "three"
+        //strInput = " echo \\\"12345\"------\"6789\\\" \"two\" \"three\"  ";
+
+        //strInput = " echo \\\"12345\\\" ";
+        //strInput = " echo \"12345\" ";
+
+        //             echo "1234\"--------\"5678"
+        //strInput = " echo \"1234\\\"--------\\\"5678\" ";
+
+        // echo "a\"b\"c"
+        //strInput = "echo \"a\\\"b\\\"c\"";
+        //strInput = "echo \\\"a\"b\"c\\\"";
     } else {
         getline(cin, strInput);
     }
