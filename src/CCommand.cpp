@@ -92,6 +92,7 @@ bool CCommand::execute() {
 //                    runNormalCommand(argv, 0, 1, nRet);
 //                }
 //                else
+//              return (TestCommand()) : executeTest() : executeCommand();
             {
                 int fd[2] = {0, 0};
                 pipe(fd);
