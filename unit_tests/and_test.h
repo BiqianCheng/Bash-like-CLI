@@ -20,9 +20,18 @@ TEST(AndOpTestSet, TwoTrueCmd) {
 TEST(AndOpTestSet, TwoTrueCmdWithComment) {
 
 
-    CCommand * pCmd1 = new CCommand ("echo first#aaa");
+    CCommand * pCmd1 = new CCommand ("echo first  #aaa");
     CCommand * pCmd2 = new CCommand ("echo second #bbb");
 
+    CAndConnector exe1(pCmd1, pCmd2);
+
+    EXPECT_EQ(exe1.execute(), true);
+}
+
+TEST(AndOpTestSet, TwoFalseCmd) {
+
+    CCommand * pCmd1 = new CCommand ("ls ");
+    CCommand * pCmd2 = new CCommand ("ls ");
     CAndConnector exe1(pCmd1, pCmd2);
 
     EXPECT_EQ(exe1.execute(), true);
@@ -39,6 +48,7 @@ TEST(AndOpTestSet, OneLeftFalseCmd) {
 
     EXPECT_EQ(exe1.execute(), false);
 }
+
 
 TEST(AndOpTestSet, OneRightFalseCmd) {
 
