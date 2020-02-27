@@ -17,6 +17,28 @@ TEST(OrOpTestSet, TwoTrueCmd) {
     EXPECT_EQ(exe1.execute(), true);
 }
 
+TEST(OrOpTestSet, LeftFalseCmd) {
+
+    CCommand * pCmd1 = new CCommand ("echo first");
+    CCommand * pCmd2 = new CCommand ("echo second");
+
+    COrConnector exe1(pCmd1, pCmd2);
+
+    EXPECT_EQ(exe1.execute(), true);
+}
+
+TEST(OrOpTestSet, RightFalseCmd) {
+
+    CCommand * pCmd1 = new CCommand ("echo first");
+    CCommand * pCmd2 = new CCommand ("echo second");
+
+    COrConnector exe1(pCmd1, pCmd2);
+
+    EXPECT_EQ(exe1.execute(), true);
+}
+
+
+
 TEST(OrOpTestSet, TwoFalseCmd) {
 
     CCommand * pCmd1 = new CCommand ("first");
