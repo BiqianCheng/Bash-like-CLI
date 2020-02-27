@@ -6,6 +6,15 @@
 #include "../header/CCommand.h"
 #include "../header/CAndConnector.h"
 
+using namespace std;
+
+TEST(AndOpTestSet, evaEqualCmd) {
+
+    CCommand * pCmd1 = new CCommand ();
+
+    EXPECT_EQ(pCmd1->execute(), true);
+}
+
 
 TEST(AndOpTestSet, TwoTrueCmd) {
 
