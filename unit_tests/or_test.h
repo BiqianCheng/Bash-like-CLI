@@ -6,6 +6,13 @@
 #include "../header/CCommand.h"
 #include "../header/COrConnector.h"
 
+TEST(OrOpTestSet, evaEqualCmd) {
+
+    CCommand * pCmd1 = new CCommand ();
+
+    EXPECT_EQ(pCmd1->execute(), true);
+}
+
 
 TEST(OrOpTestSet, TwoTrueCmd) {
 
